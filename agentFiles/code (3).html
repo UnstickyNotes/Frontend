@@ -1,0 +1,237 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Profile - Dashboard</title>
+<!-- Tailwind CSS CDN with forms and container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            app: {
+              bg: '#05181b',
+              sidebar: '#021214',
+              surface: '#082529',
+              card: '#0a2d32',
+              'card-border': '#113e44',
+              border: '#0d3137',
+              accent: '#18797b',
+              highlight: '#2dd4bf',
+              textPrimary: '#e4f4f4',
+              textSecondary: '#64999f',
+              textMuted: '#3d6c72'
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Typography & Specific Overrides -->
+<style data-purpose="custom-typography">
+    body {
+      background-color: #05181b;
+      color: #e4f4f4;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex antialiased select-none bg-[#05181b] text-[#e4f4f4]">
+<!-- BEGIN: LeftSidebar -->
+<aside class="w-64 flex-shrink-0 bg-[#021316] border-r border-[#0d3137] min-h-screen flex flex-col justify-between p-4" data-purpose="sidebar">
+<!-- Top section of sidebar -->
+<div class="space-y-6">
+<!-- User snippet in sidebar -->
+<div class="flex items-center space-x-3 px-2 py-1" data-purpose="sidebar-user-info">
+<div class="w-10 h-10 rounded-full bg-[#1b6b6d] text-[#b6f0ec] font-semibold text-sm flex items-center justify-center flex-shrink-0">
+          AJ
+        </div>
+<div class="leading-tight overflow-hidden">
+<p class="text-xs font-semibold text-[#e1f3f3] truncate">Alex Jordan</p>
+<p class="text-[11px] text-[#4e8287] truncate">@alexjordan</p>
+</div>
+</div>
+<!-- Divider -->
+<hr class="border-[#0d3137] -mx-4">
+<!-- Navigation / Collections Header -->
+<div>
+<p class="text-[11px] font-semibold tracking-wider text-[#497c82] uppercase px-3 mb-2">
+          Collections
+        </p>
+<!-- Collections Navigation List -->
+<nav class="space-y-0.5" data-purpose="collections-navigation">
+<!-- Favorites -->
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-medium text-[#7faab0] hover:text-[#e4f4f4] hover:bg-[#072428] transition-colors" href="#">
+<svg class="w-3.5 h-3.5 text-[#548a90]" fill="currentColor" viewBox="0 0 20 20">
+<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+</svg>
+<span class="">Favorites</span>
+</a>
+<!-- Friends -->
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-medium text-[#7faab0] hover:text-[#e4f4f4] hover:bg-[#072428] transition-colors" href="#">
+<svg class="w-3.5 h-3.5 text-[#548a90]" fill="currentColor" viewBox="0 0 20 20">
+<path clip-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" fill-rule="evenodd"></path>
+</svg>
+<span class="">Friends</span>
+</a>
+<!-- Jokes -->
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-medium text-[#7faab0] hover:text-[#e4f4f4] hover:bg-[#072428] transition-colors" href="#">
+<span class="text-xs leading-none">😄</span>
+<span class="">Jokes</span>
+</a>
+<!-- Travel -->
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-medium text-[#7faab0] hover:text-[#e4f4f4] hover:bg-[#072428] transition-colors" href="#">
+<svg class="w-3.5 h-3.5 text-[#548a90]" fill="currentColor" viewBox="0 0 20 20">
+<path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
+</svg>
+<span class="">Travel</span>
+</a>
+<!-- Work -->
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-medium text-[#7faab0] hover:text-[#e4f4f4] hover:bg-[#072428] transition-colors" href="#">
+<svg class="w-3.5 h-3.5 text-[#548a90]" fill="currentColor" viewBox="0 0 20 20">
+<path clip-rule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" fill-rule="evenodd"></path>
+</svg>
+<span class="">Work</span>
+</a>
+<!-- Ideas -->
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-medium text-[#7faab0] hover:text-[#e4f4f4] hover:bg-[#072428] transition-colors" href="#">
+<svg class="w-3.5 h-3.5 text-[#548a90]" fill="currentColor" viewBox="0 0 20 20">
+<path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859A4 4 0 104 10a4 4 0 003.523 3.968c.27.213.462.519.477.86h4v-.828z"></path>
+</svg>
+<span class="">Ideas</span>
+</a>
+<!-- New Collection Action -->
+<button class="w-full flex items-center space-x-3 px-3 py-2 text-xs font-medium text-[#528489] hover:text-[#8ac9cf] transition-colors mt-2" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="">New Collection</span>
+</button>
+</nav>
+</div>
+</div>
+<!-- Sidebar Bottom Section: Active Profile Link -->
+
+</aside>
+<!-- END: LeftSidebar -->
+<!-- BEGIN: MainContentWrapper -->
+<div class="flex-1 flex flex-col min-w-0" data-purpose="main-layout">
+<!-- BEGIN: TopBarHeader -->
+<header class="h-14 border-b border-[#0d3137] flex items-center justify-between px-8 bg-[#05181b]/90 backdrop-blur sticky top-0 z-20" data-purpose="top-navigation">
+<!-- Breadcrumb navigation -->
+<nav aria-label="Breadcrumb" class="flex items-center space-x-2 text-xs">
+<span class="text-[#5b898f]">Account</span>
+<span class="text-[#36595e]">›</span>
+<span class="font-semibold text-[#e1f3f3]">Profile</span>
+</nav>
+<!-- Right side controls: Light mode toggle -->
+<div class="flex items-center" data-purpose="theme-toggle">
+<button class="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[#0a2c30] hover:bg-[#0f383e] border border-[#144349] text-[#78aab0] hover:text-[#b4e6ec] text-[11px] font-medium transition-colors" type="button">
+<svg class="w-3 h-3 text-[#78aab0]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="">Light</span>
+</button>
+</div>
+</header>
+<!-- END: TopBarHeader -->
+<!-- BEGIN: ProfileContentArea -->
+<main class="flex-1 p-8 max-w-5xl w-full" data-purpose="profile-view-content">
+<!-- Main View Title -->
+<div class="mb-8">
+<h1 class="text-2xl font-bold tracking-tight text-[#e4f4f4]">Profile</h1>
+</div>
+<!-- Prominent User Profile Header Card -->
+<!-- BEGIN: UserIdentityCard -->
+<section class="mb-8 p-6 rounded-xl bg-[#082428] border border-[#0d363d] flex items-center space-x-5 max-w-2xl" data-purpose="user-identity-card">
+<!-- Large avatar circle -->
+<div class="w-20 h-20 rounded-full bg-[#1b6b6d] text-[#b6f0ec] text-2xl font-bold flex items-center justify-center flex-shrink-0 shadow-inner border-2 border-[#2b8689]/40">
+          AJ
+        </div>
+<!-- Name and ID information -->
+<div class="space-y-1">
+<h2 class="text-xl font-bold text-[#e4f4f4] tracking-tight">Alex Jordan</h2>
+<div class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-[#041618] text-[#55949b] border border-[#0e373d]">
+            #ID-849204
+          </div>
+</div>
+</section>
+<!-- END: UserIdentityCard -->
+<!-- Profile Information Fields Container -->
+<!-- BEGIN: ProfileFieldsSection -->
+<section class="max-w-2xl" data-purpose="profile-fields-container">
+<div class="rounded-xl bg-[#082428] border border-[#0d363d] overflow-hidden">
+<!-- Card Header -->
+<div class="px-6 py-4 border-b border-[#0d363d] flex items-center justify-between">
+<h3 class="text-sm font-semibold text-[#c5e6e8]">Profile Info</h3>
+<span class="text-[11px] text-[#4d7f85]">Personal details &amp; credentials</span>
+</div>
+<!-- Fields List -->
+<div class="divide-y divide-[#0c3138]">
+<!-- First Name Field -->
+<div class="px-6 py-4 flex items-center justify-between hover:bg-[#09292d]/50 transition-colors" data-purpose="field-first-name">
+<div class="space-y-1">
+<span class="text-[11px] font-medium text-[#4f8389] uppercase tracking-wider block">First Name</span>
+<span class="text-sm font-medium text-[#d9eff1]">Alex</span>
+</div>
+<!-- Edit Button -->
+<button aria-label="Edit First Name" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#558a90] hover:text-[#a0e4ea] hover:bg-[#0c353c] border border-transparent hover:border-[#134952] transition-all" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+<!-- Last Name Field -->
+<div class="px-6 py-4 flex items-center justify-between hover:bg-[#09292d]/50 transition-colors" data-purpose="field-last-name">
+<div class="space-y-1">
+<span class="text-[11px] font-medium text-[#4f8389] uppercase tracking-wider block">Last Name</span>
+<span class="text-sm font-medium text-[#d9eff1]">Jordan</span>
+</div>
+<!-- Edit Button -->
+<button aria-label="Edit Last Name" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#558a90] hover:text-[#a0e4ea] hover:bg-[#0c353c] border border-transparent hover:border-[#134952] transition-all" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+<!-- Email Field (Read-only, without edit icon) -->
+<div class="px-6 py-4 flex items-center justify-between" data-purpose="field-email-readonly">
+<div class="space-y-1">
+<div class="flex items-center space-x-2">
+<span class="text-[11px] font-medium text-[#4f8389] uppercase tracking-wider block">Email</span>
+<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] text-[#4d7f85] bg-[#041618] border border-[#0d3137]">Read-only</span>
+</div>
+<span class="text-sm font-medium text-[#8eaeb3]">alexjordan@email.com</span>
+</div>
+<!-- Locked state indicator without action button -->
+<div class="w-8 h-8 flex items-center justify-center text-[#375e64]" title="Email cannot be edited">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+</div>
+<!-- Password Field -->
+<div class="px-6 py-4 flex items-center justify-between hover:bg-[#09292d]/50 transition-colors" data-purpose="field-password">
+<div class="space-y-1">
+<span class="text-[11px] font-medium text-[#4f8389] uppercase tracking-wider block">Password</span>
+<span class="text-sm tracking-widest text-[#d9eff1] font-mono font-bold">••••••••••••</span>
+</div>
+<!-- Edit Button -->
+<button aria-label="Edit Password" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#558a90] hover:text-[#a0e4ea] hover:bg-[#0c353c] border border-transparent hover:border-[#134952] transition-all" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- END: ProfileFieldsSection -->
+</main>
+<!-- END: ProfileContentArea -->
+</div>
+<!-- END: MainContentWrapper -->
+
+
+</body></html>

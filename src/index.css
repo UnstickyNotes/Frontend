@@ -1,0 +1,170 @@
+/* ─────────────────────────────────────────────────────────────
+   UnstickyNotes — Global Design System
+   Theme: Warm Linen (light default) · Deep Teal (dark via .dark)
+   Font: Plus Jakarta Sans
+───────────────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; padding: 0; }
+
+/* ── Light Theme Tokens ──────────────────────────────────────── */
+:root {
+  color-scheme: light;
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: ui-monospace, Consolas, monospace;
+
+  /* Surfaces */
+  --bg:                   #f7f2eb;
+  --surface-low:          #eeeeee;
+  --surface:              #e8e2d8;
+  --surface-high:         #ddd6c8;
+  --surface-highest:      #d4ccbc;
+  --surface-container-lowest: #ffffff;
+
+  /* Text */
+  --text-primary:         #1a1a14;
+  --text-secondary:       #3d3d30;
+  --text-muted:           #7a7a62;
+  --text-placeholder:     #a8a88a;
+
+  /* Borders */
+  --border:               #d8d0c0;
+  --border-subtle:        #cfc8b6;
+  --border-muted:         #b8b09a;
+
+  /* Brand / Active */
+  --active-bg:            #dde8d4;
+  --active-text:          #1e3020;
+  --active-icon:          #2a835f;
+  --hover-bg:             #e4dfd2;
+
+  /* Card */
+  --card-bg:              #ffffff;
+  --card-border:          #e0d8c8;
+  --card-shadow:          0 1px 3px rgba(30, 40, 20, 0.06);
+
+  /* New-card placeholder */
+  --placeholder-bg:       #eae2d6;
+  --placeholder-border:   #c8c0a8;
+
+  /* Avatar */
+  --avatar-bg:            #c8d8b0;
+  --avatar-text:          #1e3020;
+  --avatar-border:        #a8b890;
+
+  /* Accent */
+  --accent:               #8b9a6e;
+  --accent-muted:         #a0ae82;
+
+  /* Destructive */
+  --destructive-bg:       #fce8e8;
+  --destructive-text:     #c04040;
+
+  /* Sidebar */
+  --sidebar-bg:           #eeeeee;
+  --sidebar-width:        260px;
+
+  /* Header */
+  --header-bg:            rgba(247, 242, 235, 0.92);
+
+  /* Auth overlay */
+  --overlay-primary:      linear-gradient(135deg, #2a835f 0%, #12544f 100%);
+
+  /* Button primary */
+  --btn-primary-bg:       #2a835f;
+  --btn-primary-text:     #ffffff;
+
+  /* Input focus */
+  --focus-ring:           rgba(139, 154, 110, 0.35);
+}
+
+/* ── Dark Theme Tokens ───────────────────────────────────────── */
+.dark {
+  color-scheme: dark;
+  --bg:                   #37353e;
+  --surface-low:          #2e2c35;
+  --surface:              #44444e;
+  --surface-high:         #4f4f5c;
+  --surface-highest:      #5b5b6a;
+  --surface-container-lowest: #26242c;
+
+  --text-primary:         #d3dad9;
+  --text-secondary:       #b5bcbb;
+  --text-muted:           #899190;
+  --text-placeholder:     #636b6a;
+
+  --border:               #494754;
+  --border-subtle:        #555363;
+  --border-muted:         #646175;
+
+  --active-bg:            #715a5a;
+  --active-text:          #ffffff;
+  --active-icon:          #d3dad9;
+  --hover-bg:             #44444e;
+
+  --card-bg:              #44444e;
+  --card-border:          #555363;
+  --card-shadow:          0 2px 8px rgba(25, 23, 30, 0.45);
+
+  --placeholder-bg:       #3c3a45;
+  --placeholder-border:   #545163;
+
+  --avatar-bg:            #715a5a;
+  --avatar-text:          #d3dad9;
+  --avatar-border:        #8d7575;
+
+  --accent:               #c4abaa;
+  --accent-muted:         #8d7575;
+
+  --destructive-bg:       rgba(220, 80, 80, 0.18);
+  --destructive-text:     #f48c8c;
+
+  --sidebar-bg:           #2e2c35;
+
+  --header-bg:            rgba(55, 53, 62, 0.92);
+
+  --overlay-primary:      linear-gradient(135deg, #715a5a 0%, #514954 50%, #37353e 100%);
+
+  --btn-primary-bg:       #715a5a;
+  --btn-primary-text:     #ffffff;
+
+  --focus-ring:           rgba(113, 90, 90, 0.5);
+}
+
+/* ── Base ─────────────────────────────────────────────────────── */
+html {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background-color: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  background-color: var(--bg);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+#root {
+  height: 100%;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-sans); color: var(--text-primary); margin: 0; line-height: 1.25; }
+p, span, a { margin: 0; }
+button { font-family: var(--font-sans); cursor: pointer; border: none; background: none; padding: 0; }
+input, textarea { font-family: var(--font-sans); }
+a { text-decoration: none; color: inherit; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0;
+  margin: -1px; overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border: 0;
+}

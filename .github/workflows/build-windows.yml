@@ -1,0 +1,37 @@
+name: "Build Windows Executable"
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies
+        run: npm ci # Uses package-lock.json for clean install
+
+      - name: Build Tauri Windows Executable
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__ # Auto-generates release tag based on tauri.conf.json
+          releaseName: "App Release v__VERSION__"
+          releaseBody: "Automated Windows build."
+          releaseDraft: true
+          prerelease: false

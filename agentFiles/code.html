@@ -1,0 +1,349 @@
+<!DOCTYPE html><html class="" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Authentication Portal - Deep Slate Teal</title>
+<!-- Tailwind CSS v3 CDN with forms and container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts Inter & Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            deepDark: '#001414',
+            surfaceDark: '#001f20',
+            cardDark: '#01292b',
+            accentTeal: '#14b8a6',
+            accentTealDark: '#0f766e',
+            accentGlow: 'rgba(20, 184, 166, 0.45)',
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Custom Animation Styles -->
+<style data-purpose="slider-animations">
+    /* Double Slider Animation Core Mechanics */
+    .form-container {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      transition: all 0.65s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .sign-in-container {
+      left: 0;
+      width: 50%;
+      z-index: 2;
+    }
+
+    .sign-up-container {
+      left: 0;
+      width: 50%;
+      opacity: 0;
+      z-index: 1;
+    }
+
+    /* Activated state when "Sign Up" mode is triggered */
+    #auth-container.right-panel-active .sign-in-container {
+      transform: translateX(100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #auth-container.right-panel-active .sign-up-container {
+      transform: translateX(100%);
+      opacity: 1;
+      z-index: 5;
+      animation: showContent 0.65s;
+    }
+
+    @keyframes showContent {
+      0%, 49.99% {
+        opacity: 0;
+        z-index: 1;
+      }
+      50%, 100% {
+        opacity: 1;
+        z-index: 5;
+      }
+    }
+
+    /* Sliding Overlay Styles */
+    .overlay-container {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 50%;
+      height: 100%;
+      overflow: hidden;
+      transition: transform 0.65s cubic-bezier(0.77, 0, 0.175, 1);
+      z-index: 100;
+    }
+
+    #auth-container.right-panel-active .overlay-container {
+      transform: translateX(-100%);
+    }
+
+    .overlay {
+      background: linear-gradient(135deg, #0d5f58 0%, #0f766e 45%, #14b8a6 100%);
+      position: relative;
+      left: -100%;
+      height: 100%;
+      width: 200%;
+      transform: translateX(0);
+      transition: transform 0.65s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    #auth-container.right-panel-active .overlay {
+      transform: translateX(50%);
+    }
+
+    .overlay-panel {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 0 48px;
+      text-align: center;
+      top: 0;
+      height: 100%;
+      width: 50%;
+      transform: translateX(0);
+      transition: transform 0.65s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .overlay-left {
+      transform: translateX(-20%);
+    }
+
+    #auth-container.right-panel-active .overlay-left {
+      transform: translateX(0);
+    }
+
+    .overlay-right {
+      right: 0;
+      transform: translateX(0);
+    }
+
+    #auth-container.right-panel-active .overlay-right {
+      transform: translateX(20%);
+    }
+  </style>
+<style data-purpose="custom-decorations">
+    /* Subtle background mesh and glowing ring aesthetics */
+    .mesh-gradient-bg {
+      background-color: #001212;
+      background-image: 
+        radial-gradient(at 15% 15%, rgba(15, 118, 110, 0.22) 0px, transparent 55%),
+        radial-gradient(at 85% 85%, rgba(20, 184, 166, 0.18) 0px, transparent 55%),
+        radial-gradient(at 50% 50%, rgba(2, 44, 46, 0.65) 0px, transparent 75%);
+    }
+
+    .ambient-glow {
+      box-shadow: 0 0 50px -12px rgba(20, 184, 166, 0.25), 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+  </style>
+<!-- END: Custom Animation Styles -->
+</head>
+<body class="mesh-gradient-bg text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-teal-500 selection:text-white antialiased">
+<!-- BEGIN: TopHeader -->
+<header class="w-full px-6 lg:px-12 py-5 flex items-center border-b border-teal-900/30 backdrop-blur-md bg-deepDark/40 z-50 justify-between">
+<!-- Brand Info Left -->
+
+<!-- Theme & Quick Nav Right -->
+<div class="flex items-center space-x-2"></div><div class="flex items-center space-x-4" data-purpose="header-controls">
+<button class="flex items-center space-x-2 bg-surfaceDark hover:bg-[#002e30] border border-teal-800/40 text-slate-200 hover:text-teal-300 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm duration-200" id="theme-toggle-btn" type="button">
+<!-- Sun Icon -->
+<svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="">Dark&nbsp;</span>
+</button>
+
+</div>
+</header>
+<!-- END: TopHeader -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-10 relative overflow-hidden" data-purpose="auth-view-wrapper">
+<!-- Background subtle floating circles -->
+<div class="absolute -top-24 -left-24 w-96 h-96 bg-teal-600/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute -bottom-24 -right-24 w-96 h-96 bg-teal-400/10 rounded-full blur-3xl pointer-events-none"></div>
+<!-- Central Interactive Double Slider Auth Card -->
+<div class="relative w-full max-w-[940px] min-h-[640px] bg-cardDark/90 backdrop-blur-xl rounded-3xl border border-teal-500/20 ambient-glow overflow-hidden" id="auth-container">
+<!-- ================= SIGN UP / REGISTER PANEL (Left in DOM, animated in) ================= -->
+<div class="form-container sign-up-container flex items-center justify-center p-8 sm:p-12" data-purpose="sign-up-form-panel">
+<form action="#" class="w-full max-w-sm flex flex-col items-center text-center" onsubmit="event.preventDefault();">
+<h2 class="text-3xl font-extrabold text-white tracking-tight mb-2">Create Account</h2>
+<!-- Social circular icon buttons -->
+
+
+<!-- Register Inputs -->
+<div class="w-full space-y-3 mb-5 text-left">
+<div class="grid grid-cols-2 gap-2">
+<div>
+<input class="w-full px-4 py-2.5 bg-[#001c1d] border border-teal-900/60 rounded-xl text-sm text-slate-100 placeholder-teal-200/40 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition" placeholder="First Name" required="" type="text">
+</div>
+<div>
+<input class="w-full px-4 py-2.5 bg-[#001c1d] border border-teal-900/60 rounded-xl text-sm text-slate-100 placeholder-teal-200/40 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition" placeholder="Last Name" required="" type="text">
+</div>
+</div>
+<div>
+<input class="w-full px-4 py-2.5 bg-[#001c1d] border border-teal-900/60 rounded-xl text-sm text-slate-100 placeholder-teal-200/40 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition" placeholder="Email address" required="" type="email">
+</div>
+<div>
+<input class="w-full px-4 py-2.5 bg-[#001c1d] border border-teal-900/60 rounded-xl text-sm text-slate-100 placeholder-teal-200/40 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition" placeholder="Create password" required="" type="password">
+</div>
+</div>
+<!-- Action Button -->
+<button class="w-48 py-3 rounded-full bg-gradient-to-r from-teal-500 to-teal-400 hover:from-teal-400 hover:to-teal-300 text-[#001a1b] font-bold text-xs uppercase tracking-widest transition duration-300 shadow-lg shadow-teal-500/25 active:scale-95" type="submit">
+            Sign Up
+          </button>
+<!-- SSO Divider -->
+<div class="w-full flex items-center my-4">
+<div class="flex-grow border-t border-teal-900/40"></div>
+<span class="px-3 text-[11px] text-teal-200/40 uppercase tracking-wider">or fast access</span>
+<div class="flex-grow border-t border-teal-900/40"></div>
+</div>
+<!-- Continue with Google SSO -->
+<button class="w-full flex items-center justify-center space-x-2 py-2.5 px-4 rounded-xl border border-teal-800/40 hover:border-teal-500/60 bg-[#001b1c] hover:bg-teal-900/20 text-slate-200 text-xs font-semibold transition" type="button">
+<svg class="w-4 h-4" viewBox="0 0 24 24">
+<path d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z" fill="#EA4335"></path>
+<path d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5.1 3.7-8.8z" fill="#4285F4"></path>
+<path d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 10.8 0 12.5s.7 2.8 1.9 5.2l3.7-2.9z" fill="#FBBC05"></path>
+<path d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2-6.4-4.8L1.9 17.4C3.7 21.1 7.5 24 12 24z" fill="#34A853"></path>
+</svg>
+<span class="">Continue with Google</span>
+</button>
+</form>
+</div>
+<!-- ================= SIGN IN PANEL (Default Visible) ================= -->
+<div class="form-container sign-in-container flex items-center justify-center p-8 sm:p-12" data-purpose="sign-in-form-panel">
+<form action="#" class="w-full max-w-sm flex flex-col items-center text-center" onsubmit="event.preventDefault();">
+<h2 class="text-3xl font-extrabold text-white tracking-tight mb-2">Sign in</h2>
+<!-- Social circular icon buttons -->
+
+
+<!-- Sign In Inputs -->
+<div class="w-full space-y-3 mb-3 text-left">
+<div>
+<input class="w-full px-4 py-3 bg-[#001c1d] border border-teal-900/60 rounded-xl text-sm text-slate-100 placeholder-teal-200/40 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition" placeholder="Email" required="" type="email">
+</div>
+<div>
+<input class="w-full px-4 py-3 bg-[#001c1d] border border-teal-900/60 rounded-xl text-sm text-slate-100 placeholder-teal-200/40 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition" placeholder="Password" required="" type="password">
+</div>
+</div>
+<a class="text-xs text-teal-300/80 hover:text-teal-200 transition font-medium mb-6" href="#forgot">Forgot your password?</a>
+<!-- Action Button with glowing Teal accent -->
+<button class="w-48 py-3 rounded-full bg-gradient-to-r from-teal-500 to-teal-400 hover:from-teal-400 hover:to-teal-300 text-[#001a1b] font-bold text-xs uppercase tracking-widest transition duration-300 shadow-lg shadow-teal-500/25 active:scale-95" type="submit">
+            Sign In
+          </button>
+<!-- SSO Divider -->
+<div class="w-full flex items-center my-4">
+<div class="flex-grow border-t border-teal-900/40"></div>
+<span class="px-3 text-[11px] text-teal-200/40 uppercase tracking-wider">or sign in with</span>
+<div class="flex-grow border-t border-teal-900/40"></div>
+</div>
+<!-- Continue with Google SSO -->
+<button class="w-full flex items-center justify-center space-x-2 py-2.5 px-4 rounded-xl border border-teal-800/40 hover:border-teal-500/60 bg-[#001b1c] hover:bg-teal-900/20 text-slate-200 text-xs font-semibold transition" type="button">
+<svg class="w-4 h-4" viewBox="0 0 24 24">
+<path d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z" fill="#EA4335"></path>
+<path d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5.1 3.7-8.8z" fill="#4285F4"></path>
+<path d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 10.8 0 12.5s.7 2.8 1.9 5.2l3.7-2.9z" fill="#FBBC05"></path>
+<path d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2-6.4-4.8L1.9 17.4C3.7 21.1 7.5 24 12 24z" fill="#34A853"></path>
+</svg>
+<span class="">Continue with Google</span>
+</button>
+</form>
+</div>
+<!-- ================= DOUBLE SLIDER OVERLAY CONTAINER ================= -->
+<div class="overlay-container" data-purpose="animated-overlay-slider">
+<div class="overlay">
+<!-- Overlay Left Panel (Shown when active/SignUp is active) -->
+<div class="overlay-panel overlay-left" data-purpose="overlay-welcome-back">
+<div class="max-w-xs space-y-4">
+<h2 class="text-3xl lg:text-4xl font-extrabold text-white tracking-tight">Welcome Back!</h2>
+<p class="text-sm font-medium text-teal-50/90 leading-relaxed">
+                To keep connected with us please login with your personal info
+              </p>
+<div class="pt-4">
+<button class="px-10 py-3 rounded-full border-2 border-white/90 text-white font-bold text-xs tracking-widest uppercase hover:bg-white hover:text-teal-900 transition-all duration-300 shadow-md transform hover:scale-105 active:scale-95" id="signInBtn" type="button">
+                  Sign In
+                </button>
+</div>
+</div>
+</div>
+<!-- Overlay Right Panel (Default Visible when SignIn is active) -->
+<div class="overlay-panel overlay-right" data-purpose="overlay-hello-friend">
+<div class="max-w-xs space-y-4">
+<h2 class="text-3xl lg:text-4xl font-extrabold text-white tracking-tight">Hello, Friend!</h2>
+<p class="text-sm font-medium text-teal-50/90 leading-relaxed">
+                Enter your personal details and start journey with us
+              </p>
+<div class="pt-4">
+<button class="px-10 py-3 rounded-full border-2 border-white/90 text-white font-bold text-xs tracking-widest uppercase hover:bg-white hover:text-teal-900 transition-all duration-300 shadow-md transform hover:scale-105 active:scale-95" id="signUpBtn" type="button">
+                  Sign Up
+                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: Footer -->
+<footer class="w-full px-6 py-4 text-center border-t border-teal-950/40 text-teal-300/40 text-xs flex flex-col sm:flex-row items-center justify-between z-10">
+<p class="">© 2025 Collections Personal Workspace. Protected with Enterprise SSO &amp; MFA.</p>
+<div class="flex space-x-5 mt-2 sm:mt-0">
+<a class="hover:text-teal-300 transition-colors" href="#privacy">Privacy Policy</a>
+<a class="hover:text-teal-300 transition-colors" href="#terms">Terms of Service</a>
+<a class="hover:text-teal-300 transition-colors" href="#security">Security Status</a>
+</div>
+</footer>
+<!-- END: Footer -->
+<!-- BEGIN: Logic & Interactivity Script -->
+<script data-purpose="double-slider-logic">
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('auth-container');
+      const signUpBtn = document.getElementById('signUpBtn');
+      const signInBtn = document.getElementById('signInBtn');
+      const themeToggleBtn = document.getElementById('theme-toggle-btn');
+
+      // Double slider toggle events
+      if (signUpBtn && signInBtn && container) {
+        signUpBtn.addEventListener('click', () => {
+          container.classList.add('right-panel-active');
+        });
+
+        signInBtn.addEventListener('click', () => {
+          container.classList.remove('right-panel-active');
+        });
+      }
+
+      // Theme toggle simulation (feedback for desktop preview)
+      if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+          const isDark = document.documentElement.classList.toggle('dark');
+          const span = themeToggleBtn.querySelector('span');
+          if (span) {
+            span.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+          }
+        });
+      }
+    });
+  </script>
+<!-- END: Logic & Interactivity Script -->
+
+
+
+
+</body></html>
