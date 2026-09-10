@@ -7,6 +7,7 @@ import type {
     AuthResponse,
 } from "../types";
 
+
 export const register = async(credentials:RegisterCredentials) => {
     const payload = {
         ...credentials,

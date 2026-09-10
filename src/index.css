@@ -33,7 +33,7 @@ body { margin: 0; padding: 0; }
   --border-muted:         #b8b09a;
 
   /* Brand / Active */
-  --active-bg:            #dde8d4;
+  --active-bg:            #d4edad;
   --active-text:          #1e3020;
   --active-icon:          #2a835f;
   --hover-bg:             #e4dfd2;
@@ -97,7 +97,7 @@ body { margin: 0; padding: 0; }
   --border-subtle:        #555363;
   --border-muted:         #646175;
 
-  --active-bg:            #715a5a;
+  --active-bg:            #5e3232;
   --active-text:          #ffffff;
   --active-icon:          #d3dad9;
   --hover-bg:             #44444e;
@@ -133,6 +133,7 @@ body { margin: 0; padding: 0; }
 
 /* ── Base ─────────────────────────────────────────────────────── */
 html {
+  zoom: 1.35;
   font-family: var(--font-sans);
   font-size: 14px;
   line-height: 1.6;

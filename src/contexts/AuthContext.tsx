@@ -31,14 +31,33 @@ const AuthContext = createContext<AuthContextValue>({
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('un-token'))
+
+  // On first load also check for ?token= in the URL — this is how the backend
+  // returns the token after a successful Google OAuth redirect.
+  const [token, setToken] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search)
+    const oauthToken = params.get('token')
+    if (oauthToken) {
+      localStorage.setItem('un-token', oauthToken)
+      // Remove the token from the URL so it doesn't linger in browser history
+      window.history.replaceState({}, '', window.location.pathname)
+      return oauthToken
+    }
+    return localStorage.getItem('un-token')
+  })
+
   const [isLoading, setIsLoading] = useState(true)
 
   // On mount, if token exists try to load profile
   useEffect(() => {
     if (token && !user) {
       ProfileService.getProfile()
-        .then(res => { if (res.data) setUser(res.data) })
+        .then(res => {
+          const userData = (res as any)?.data ?? res
+          if (userData && (userData.id || userData.email)) {
+            setUser(userData)
+          }
+        })
         .catch(() => {
           localStorage.removeItem('un-token')
           setToken(null)
@@ -61,7 +80,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const profileRes = await ProfileService.getProfile()
-      if (profileRes.data) setUser(profileRes.data)
+      const userData = (profileRes as any)?.data ?? profileRes
+      if (userData && (userData.id || userData.email)) {
+        setUser(userData)
+      }
     } catch {
       // Profile can be fetched by useEffect if needed
     }
@@ -80,8 +102,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const refreshUser = async () => {
-    const res = await ProfileService.getProfile()
-    if (res.data) setUser(res.data)
+    try {
+      const res = await ProfileService.getProfile()
+      const userData = (res as any)?.data ?? res
+      if (userData && (userData.id || userData.email)) {
+        setUser(userData)
+      }
+    } catch (err) {
+      console.warn('Failed to refresh user:', err)
+    }
   }
 
   return (

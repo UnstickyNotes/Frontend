@@ -22,6 +22,9 @@ export interface User {
     last_name? : string,
     email : string,
     is_admin : boolean,
+    avatar_url? : string | null,
+    avatarUrl? : string | null,
+    avatar? : string | null,
     created_at? : string,
     updated_at? : string
 }
@@ -64,6 +67,9 @@ export interface UserAttributes {
     lastName?: string,
     first_name? : string,
     last_name? : string,
+    avatar_url? : string | null,
+    avatarUrl? : string | null,
+    avatar? : string | null,
     password? : string
 }
 

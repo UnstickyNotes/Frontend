@@ -26,6 +26,10 @@ interface PasswordInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEle
   id: string
   /** Extra wrapper class (e.g. to match a grid row). */
   wrapperClassName?: string
+  /** Whether to prevent copying or cutting the password value */
+  preventCopy?: boolean
+  /** Whether to prevent browser password manager / autofill popup */
+  preventAutofill?: boolean
 }
 
 /**
@@ -37,17 +41,51 @@ export default function PasswordInput({
   className = 'auth-input',
   wrapperClassName,
   style,
+  preventCopy = false,
+  preventAutofill = false,
+  onCopy,
+  onCut,
+  onContextMenu,
+  onDragStart,
   ...props
 }: PasswordInputProps) {
   const [visible, setVisible] = useState(false)
+
+  const isWebkitSecuritySupported =
+    typeof CSS !== 'undefined' &&
+    typeof CSS.supports === 'function' &&
+    CSS.supports('-webkit-text-security', 'disc')
+
+  // When preventAutofill is true, use type="text" with -webkit-text-security: disc
+  // on Chromium/WebKit to bypass browser password manager autofill heuristics.
+  const inputType =
+    preventAutofill && isWebkitSecuritySupported
+      ? 'text'
+      : visible
+        ? 'text'
+        : 'password'
+
+  const textSecurityStyle: React.CSSProperties =
+    preventAutofill && isWebkitSecuritySupported
+      ? ({ WebkitTextSecurity: visible ? 'none' : 'disc' } as React.CSSProperties)
+      : {}
 
   return (
     <div className={`pwd-input-wrapper${wrapperClassName ? ` ${wrapperClassName}` : ''}`}>
       <input
         id={id}
-        type={visible ? 'text' : 'password'}
-        className={className}
-        style={{ paddingRight: '2.75rem', ...style }}
+        type={inputType}
+        className={`${className}${preventAutofill ? (visible ? ' no-autofill-password--visible' : ' no-autofill-password') : ''}`}
+        style={{
+          paddingRight: '2.75rem',
+          ...(preventCopy ? { userSelect: 'none', WebkitUserSelect: 'none' } : {}),
+          ...textSecurityStyle,
+          ...style,
+        }}
+        onCopy={preventCopy ? e => { e.preventDefault(); onCopy?.(e) } : onCopy}
+        onCut={preventCopy ? e => { e.preventDefault(); onCut?.(e) } : onCut}
+        onContextMenu={preventCopy ? e => { e.preventDefault(); onContextMenu?.(e) } : onContextMenu}
+        onDragStart={preventCopy ? e => { e.preventDefault(); onDragStart?.(e) } : onDragStart}
         {...props}
       />
       <button

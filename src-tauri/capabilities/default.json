@@ -6,7 +6,7 @@
   "permissions": [
     "core:default",
     {
-      "identifier": "http:default",
+      "identifier":"core:app:allow-identifier",
       "allow": [
         { "url": "http://localhost:8000/*" },
         { "url": "http://127.0.0.1:8000/*" }

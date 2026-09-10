@@ -56,6 +56,12 @@ const router = createBrowserRouter([
     element: <RequireAuth><NoteEditPage /></RequireAuth>,
   },
   {
+    // Backend redirects here after Google OAuth. Token was already extracted
+    // by AuthContext before routing runs — just send the user home.
+    path: '/oauth/callback',
+    element: <Navigate to="/" replace />,
+  },
+  {
     path: '*',
     element: <Navigate to="/" replace />,
   },

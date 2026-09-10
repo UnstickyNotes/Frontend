@@ -17,7 +17,7 @@ function GoogleLogo() {
 
 function MoonIcon() {
   return (
-    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
       <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
@@ -25,8 +25,26 @@ function MoonIcon() {
 
 function SunIcon() {
   return (
-    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
       <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+// ── Tiny spinner for the Google button ───────────────────────
+function ButtonSpinner() {
+  return (
+    <svg
+      width="14" height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      strokeLinecap="round"
+      aria-hidden="true"
+      className="btn-spinner"
+    >
+      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
     </svg>
   )
 }
@@ -40,6 +58,7 @@ function SignInForm() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -56,6 +75,14 @@ function SignInForm() {
     }
   }
 
+  // Google OAuth: redirect the browser to the backend. AuthContext will pick
+  // up the returned ?token= from the URL when Google redirects back.
+  const handleGoogleAuth = () => {
+    setGoogleLoading(true)
+    setTimeout(() => {
+      window.location.href = 'http://localhost:8000/api/OAuth/google/redirect'
+    }, 80)
+  }
   return (
     <form className="auth-form" onSubmit={handleSubmit} noValidate>
       <h2 className="auth-form-title">Sign in</h2>
@@ -75,8 +102,10 @@ function SignInForm() {
         <span className="auth-divider-label">or sign in with</span>
         <div className="auth-divider-line" />
       </div>
-      <button className="auth-google-btn" type="button">
-        <GoogleLogo /><span>Continue with Google</span>
+      <button className="auth-google-btn" type="button" onClick={handleGoogleAuth} disabled={googleLoading}>
+        <GoogleLogo />
+        <span>{googleLoading ? 'Redirecting…' : 'Continue with Google'}</span>
+        {googleLoading && <ButtonSpinner />}
       </button>
     </form>
   )
@@ -93,6 +122,7 @@ function SignUpForm() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -120,6 +150,15 @@ function SignUpForm() {
     }
   }
 
+  // Google OAuth: redirect the browser to the backend. AuthContext will pick
+  // up the returned ?token= from the URL when Google redirects back.
+  const handleGoogleAuth = () => {
+    setGoogleLoading(true)
+    setTimeout(() => {
+      window.location.href = 'http://localhost:8000/api/OAuth/google/redirect'
+    }, 80)
+  }
+
   return (
     <form className="auth-form" onSubmit={handleSubmit} noValidate>
       <h2 className="auth-form-title">Create Account</h2>
@@ -144,8 +183,10 @@ function SignUpForm() {
         <span className="auth-divider-label">or fast access</span>
         <div className="auth-divider-line" />
       </div>
-      <button className="auth-google-btn" type="button">
-        <GoogleLogo /><span>Continue with Google</span>
+      <button className="auth-google-btn" type="button" onClick={handleGoogleAuth} disabled={googleLoading}>
+        <GoogleLogo />
+        <span>{googleLoading ? 'Redirecting…' : 'Continue with Google'}</span>
+        {googleLoading && <ButtonSpinner />}
       </button>
     </form>
   )
@@ -161,8 +202,9 @@ export default function AuthPage() {
     <div className={`auth-page${theme === 'dark' ? ' dark-auth' : ''}`}>
       <header className="auth-topbar">
         <button id="auth-theme-toggle" className="theme-toggle-btn" onClick={toggleTheme} type="button"
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}>
-          {theme === 'light' ? <><MoonIcon /> Dark</> : <><SunIcon /> Light</>}
+          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}>
+          {theme === 'light' ? <MoonIcon /> : <SunIcon />}
         </button>
       </header>
 

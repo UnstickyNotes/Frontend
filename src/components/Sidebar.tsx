@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router'
+import { useAuth } from '../contexts/AuthContext'
+import { AvatarCacheService } from '../services/AvatarCacheService'
 import { type Collection } from '../types'
 
 // ── Icons ─────────────────────────────────────────────────────
@@ -117,10 +119,38 @@ export default function Sidebar({
 }: SidebarProps) {
   const navigate = useNavigate()
   const { collectionId } = useParams()
+  const { user } = useAuth()
   const [activeMenuId, setActiveMenuId] = useState<number | null>(null)
+  const [avatarVersion, setAvatarVersion] = useState(0)
+  const [imageError, setImageError] = useState(false)
   const menuRef = useRef<HTMLDivElement | null>(null)
 
   const initials = getInitials(userName)
+
+  // Listen for avatar updates (e.g. when uploaded or deleted in ProfilePage)
+  useEffect(() => {
+    const handleAvatarChange = () => {
+      setAvatarVersion(v => v + 1)
+      setImageError(false)
+    }
+    window.addEventListener('avatar-changed', handleAvatarChange)
+    return () => window.removeEventListener('avatar-changed', handleAvatarChange)
+  }, [])
+
+  // 1. Check custom uploaded avatar from cache
+  const customCached = user?.id ? AvatarCacheService.getCachedAvatar(user.id) : null
+
+  // 2. Otherwise use remote avatar URL from user object
+  const raw = user?.avatar_url || user?.avatarUrl || user?.avatar || null
+  const resolvedUrl = raw
+    ? raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('data:')
+      ? raw
+      : raw.startsWith('/')
+        ? `http://localhost:8000${raw}`
+        : `http://localhost:8000/${raw}`
+    : null
+
+  const avatarSrc = customCached || resolvedUrl
 
   // Ensure "Unsorted" (id -1) is always at the top and only appears once
   const allCollections = [
@@ -152,7 +182,20 @@ export default function Sidebar({
         onKeyDown={e => e.key === 'Enter' && navigate('/profile')}
         aria-label="Go to profile settings"
       >
-        <div className="sidebar-avatar">{initials}</div>
+        <div className="sidebar-avatar">
+          {avatarSrc && !imageError ? (
+            <img
+              key={`${avatarSrc}-${avatarVersion}`}
+              src={avatarSrc}
+              alt={userName}
+              className="sidebar-avatar-img"
+              referrerPolicy="no-referrer"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <span>{initials}</span>
+          )}
+        </div>
         <div style={{ overflow: 'hidden', minWidth: 0 }}>
           <p className="sidebar-user-name">{userName}</p>
         </div>

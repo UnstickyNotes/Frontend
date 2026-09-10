@@ -9,11 +9,25 @@ export const getProfile = async() => {
     const response = await api.get<Response<User>>('/profile');
     return response.data;
 }
-// to be implemented
-// export const setPfp = async(img:any) => {
-//     const response = await api.post('/profile/setPfp', img);
-//     return response.data;
-// }
+export const setPfp = async(file: File | FormData) => {
+    const formData = file instanceof FormData ? file : new FormData();
+    if (file instanceof File) {
+        formData.append('avatar', file);
+        formData.append('image', file);
+        formData.append('pfp', file);
+    }
+    const response = await api.post<Response<User>>('/profile/setPfp', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+    return response.data;
+}
+
+export const deletePfp = async() => {
+    const response = await api.delete<Response<User>>('/profile/pfp');
+    return response.data;
+}
 
 export const updateProfile = async(updateInfo:UserAttributes) => {
     const payload = {
@@ -27,7 +41,7 @@ export const updateProfile = async(updateInfo:UserAttributes) => {
     return response.data;
 }
 
-export const deleteAccount = async() => {
-    const response = await api.delete<Response<User>>('/profile');
+export const deleteAccount = async(password:string) => {
+    const response = await api.delete<Response<User>>(`/profile/${password}`);
     return response.data;
 }

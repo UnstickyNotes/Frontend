@@ -4,22 +4,28 @@
 .theme-toggle-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.25rem 0.75rem;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
   border-radius: 9999px;
   border: 1px solid var(--border-subtle);
   background-color: var(--surface);
   color: var(--text-secondary);
-  font-size: 0.6875rem;
-  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-  white-space: nowrap;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  flex-shrink: 0;
 }
 
 .theme-toggle-btn:hover {
   background-color: var(--surface-high);
   color: var(--text-primary);
+  transform: scale(1.06);
+}
+
+.theme-toggle-btn svg {
+  width: 18px;
+  height: 18px;
 }
 
 /* ── Auth Page ───────────────────────────────────────────────── */
@@ -319,6 +325,15 @@ input:-webkit-autofill:active {
   flex-shrink: 0; border: 1px solid var(--avatar-border);
   transition: background-color 0.2s ease, color 0.2s ease;
   user-select: none;
+  overflow: hidden;
+}
+
+.sidebar-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  object-fit: cover;
+  display: block;
 }
 
 .sidebar-user-name {
@@ -788,6 +803,13 @@ input:-webkit-autofill:active {
   text-align: center;
 }
 
+.profile-avatar-container {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .profile-avatar {
   width: 5.5rem;
   height: 5.5rem;
@@ -803,7 +825,93 @@ input:-webkit-autofill:active {
   border: 2px solid var(--avatar-border);
   user-select: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  overflow: visible;
 }
+.profile-avatar:hover {
+  transform: scale(1.03);
+  border-color: var(--accent);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+.profile-avatar:active {
+  transform: scale(0.98);
+}
+
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-avatar-initials {
+  line-height: 1;
+}
+
+.profile-avatar-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  background-color: var(--surface);
+  border: 2px solid var(--card-bg);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.profile-avatar:hover .profile-avatar-badge {
+  background-color: var(--accent);
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.profile-avatar-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  z-index: 200;
+  min-width: 205px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.2), 0 2px 8px -2px rgba(0, 0, 0, 0.1);
+  padding: 0.35rem;
+  animation: col-dropdown-in 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.profile-avatar-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.4rem;
+  border: none;
+  background: none;
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.1s ease, color 0.1s ease;
+}
+.profile-avatar-dropdown-item:hover {
+  background-color: var(--hover-bg);
+}
+.profile-avatar-dropdown-item--destructive {
+  color: var(--destructive-text);
+}
+.profile-avatar-dropdown-item--destructive:hover {
+  background-color: var(--destructive-bg);
+}
+
 
 .profile-name {
   font-size: 1.35rem;
@@ -900,6 +1008,32 @@ input:-webkit-autofill:active {
 }
 .signout-btn:hover { filter: brightness(0.93); }
 .signout-btn:active { transform: scale(0.97); }
+
+.delete-account-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.75rem;
+  border-radius: 0.5rem;
+  background-color: transparent;
+  color: var(--destructive-text);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin: 0.75rem auto 0;
+  opacity: 0.85;
+}
+.delete-account-btn:hover {
+  opacity: 1;
+  background-color: var(--destructive-bg);
+  filter: brightness(0.95);
+}
+.delete-account-btn:active {
+  transform: scale(0.97);
+}
 
 /* ── Loading spinner ─────────────────────────────────────────── */
 .loading-screen {
@@ -1246,3 +1380,22 @@ input:-webkit-autofill:active {
 .pwd-toggle-btn:active {
   color: var(--text-primary);
 }
+
+/* ── Button spinner (Google OAuth redirect feedback) ─────────── */
+@keyframes btn-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.btn-spinner {
+  animation: btn-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ── No-autofill password input (bypasses browser password manager popups) ── */
+.no-autofill-password {
+  -webkit-text-security: disc !important;
+}
+.no-autofill-password--visible {
+  -webkit-text-security: none !important;
+}
+
