@@ -143,17 +143,18 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   height: 100%;
+  overflow: hidden;
 }
 
 body {
   height: 100%;
   background-color: var(--bg);
   transition: background-color 0.2s ease, color 0.2s ease;
+  overflow: hidden;
 }
 
 #root {
   height: 100%;
-  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
