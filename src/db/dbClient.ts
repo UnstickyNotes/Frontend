@@ -1,5 +1,7 @@
 import Database from "@tauri-apps/plugin-sql";
 
-export const db = async () => {
+const getDB = async () => {
     return Database.load("sqlite:UnstickyNotes.db");
 }
+
+export default getDB;

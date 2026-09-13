@@ -43,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.history.replaceState({}, '', window.location.pathname)
       return oauthToken
     }
+    localStorage.setItem('user_id', (user as any)?.id ?? -1);
     return localStorage.getItem('un-token')
   })
 
@@ -97,6 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try { await AuthService.logout() } catch { /* ignore */ }
     localStorage.removeItem('un-token')
+    localStorage.removeItem('user_id')
     setToken(null)
     setUser(null)
   }

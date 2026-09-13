@@ -4,6 +4,8 @@ import { useTheme } from '../contexts/ThemeContext'
 import { useAuth } from '../contexts/AuthContext'
 import PasswordInput from '../components/PasswordInput'
 
+// import { isOnline } from '../syncServices/SyncManager';
+
 function GoogleLogo() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
@@ -197,10 +199,12 @@ function SignUpForm() {
 export default function AuthPage() {
   const { theme, toggleTheme } = useTheme()
   const [signUpActive, setSignUpActive] = useState(false)
+  // const status = isOnline()
 
   return (
     <div className={`auth-page${theme === 'dark' ? ' dark-auth' : ''}`}>
       <header className="auth-topbar">
+              {/* <input placeholder={`${status ? 'online' : 'offline'}`}/> */}
         <button id="auth-theme-toggle" className="theme-toggle-btn" onClick={toggleTheme} type="button"
           aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
           title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}>

@@ -1,12 +1,9 @@
 // Response payload
-interface GenericResponse {
+export interface Response <T>{
     status : boolean,
     message : string,
-}
-
-export interface Response<T> extends GenericResponse{
     data? : T
-} 
+}
 
 export interface AuthData {
     type : string,
@@ -83,3 +80,26 @@ export interface NoteAttributes {
     collection_id? : number,
     collectionId? : number
 }
+
+export interface SyncQueueAttrbutes {
+    entity_type : string,
+    entity_remote_id? : string,
+    action : string,
+    payload? : object
+}
+
+export interface SyncQueue {
+    id:string,
+    entity_name : string,
+    entity_remote_id? : string,
+    action : string, 
+    payload? : object,
+    created_at : string
+}
+
+export interface PushAttributes {
+    user_id : string,
+    payload : string
+}
+
+export type PushResponse = Response<PushAttributes>

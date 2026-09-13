@@ -133,10 +133,10 @@ export default function NoteEditPage() {
 
   return (
     <AppLayout collections={collections} userName={userName} userHandle={userHandle} topbarLeft={topbarLeft}>
-      <div className="main-scroll">
-        <form onSubmit={handleSave}>
-          {error && <div className="auth-error" style={{ maxWidth: '480px', marginBottom: '0.75rem' }}>{error}</div>}
-          <div className="note-header-row">
+      <div className="main-scroll note-edit-main-scroll">
+        <form className="note-edit-form" onSubmit={handleSave}>
+          {error && <div className="auth-error note-edit-error">{error}</div>}
+          <div className="note-header-row note-edit-header-row">
             <input
               id="edit-card-title"
               className="note-editor-title-input"
