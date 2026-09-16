@@ -32,7 +32,7 @@ interface AppLayoutProps {
   onNewCollection?: () => void
   onCollectionCreated?: (collection: Collection) => void
   onCollectionUpdated?: (collection: Collection) => void
-  onCollectionDeleted?: (collectionId: number) => void
+  onCollectionDeleted?: (collectionId: string | number) => void
   /** Extra controls to render in the topbar right slot (e.g. icon buttons) */
   topbarLeft?: ReactNode
   topbarRight?: ReactNode
@@ -72,18 +72,19 @@ export default function AppLayout({
 
   const handleCreateCollection = async (name: string) => {
     const res = await CollectionService.addCollection({ name })
-    if (res.data) {
-      setCurrentCollections(prev => [...prev, res.data!])
+    const created = (res as { data?: Collection }).data
+    if (created) {
+      setCurrentCollections(prev => [...prev, created])
       if (onCollectionCreated) {
-        onCollectionCreated(res.data)
+        onCollectionCreated(created)
       }
-      navigate(`/${res.data.id}`)
+      navigate(`/${created.id}`)
     }
   }
 
   const handleUpdateCollection = async (newName: string) => {
     if (!editingCollection) return
-    const res = await CollectionService.updateCollection({ name: newName }, editingCollection.id)
+    const res = await CollectionService.updateCollection({ name: newName }, String(editingCollection.id))
     const updated = (res as { data?: Collection }).data ?? { ...editingCollection, name: newName }
     setCurrentCollections(prev => prev.map(c => (c.id === updated.id ? updated : c)))
     if (onCollectionUpdated) {
@@ -95,7 +96,7 @@ export default function AppLayout({
   const handleDeleteCollection = async () => {
     if (!deletingCollection) return
     const idToDelete = deletingCollection.id
-    await CollectionService.deleteCollection(idToDelete)
+    await CollectionService.deleteCollection(String(idToDelete))
     setCurrentCollections(prev => prev.filter(c => c.id !== idToDelete))
     if (onCollectionDeleted) {
       onCollectionDeleted(idToDelete)

@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS collections (
     remote_id INTEGER NULL,                    -- Assigned by Laravel backend after sync
     user_id INTEGER NOT NULL,                     -- Foreign Key linking to users.id
     name TEXT NOT NULL,
-    sync_status TEXT DEFAULT 'pending_create', -- 'synced', 'pending_create', 'pending_update', 'pending_delete'
+    sync_status TEXT DEFAULT 'pending',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -24,10 +24,10 @@ CREATE TABLE IF NOT EXISTS notes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     remote_id INTEGER NULL,                    -- Assigned by Laravel backend after sync
     user_id INTEGER NOT NULL,                     -- Foreign Key linking to users.id
-    collection_id INTEGER NOT NULL,               -- Foreign Key linking to collections.id
-    title TEXT NOT NULL,
-    body TEXT NOT NULL,
-    sync_status TEXT DEFAULT 'pending_create',
+    collection_id INTEGER NULL,               -- Foreign Key linking to collections.id
+    title TEXT NULL,
+    body TEXT NULL,
+    sync_status TEXT DEFAULT 'pending',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,

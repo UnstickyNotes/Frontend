@@ -32,7 +32,7 @@ export default function CollectionsPage() {
   // Load collections on mount or when collectionId changes
   useEffect(() => {
     CollectionService.getCollections()
-      .then((res: { data?: Collection[] }) => {
+      .then((res) => {
         const cols: Collection[] = res.data ?? []
         setCollections(cols)
         if (collectionId) {
@@ -77,9 +77,10 @@ export default function CollectionsPage() {
 
   const handleCreateCollection = async (name: string) => {
     const res = await CollectionService.addCollection({ name })
-    if (res.data) {
-      setCollections(prev => [...prev, res.data!])
-      navigate(`/${res.data.id}`)
+    const created = (res as { data?: Collection }).data
+    if (created) {
+      setCollections(prev => [...prev, created])
+      navigate(`/${created.id}`)
     }
   }
 
@@ -90,7 +91,7 @@ export default function CollectionsPage() {
     }
   }
 
-  const handleCollectionDeleted = (id: number) => {
+  const handleCollectionDeleted = (id: string | number) => {
     setCollections(prev => prev.filter(c => c.id !== id))
     if (String(currentCollection?.id) === String(id)) {
       setCurrentCollection({ id: -1, name: 'Unsorted' })

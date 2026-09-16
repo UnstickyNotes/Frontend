@@ -2,7 +2,7 @@
 export interface Response <T>{
     status : boolean,
     message : string,
-    data? : T
+    data? : T | null
 }
 
 export interface AuthData {
@@ -14,7 +14,7 @@ export type AuthResponse = Response<AuthData>
 
 // Entities
 export interface User {
-    id : number,
+    id : string,
     first_name : string,
     last_name? : string,
     email : string,
@@ -28,7 +28,7 @@ export interface User {
 }
 
 export interface Collection {
-    id : number,
+    id : string | number | null,
     name : string,
     user_id? : number,
     created_at? : string,
@@ -36,7 +36,7 @@ export interface Collection {
 }
 
 export interface Note {
-    id : number,
+    id : string,
     title : string,
     body? : string,
     collection_id? : number,

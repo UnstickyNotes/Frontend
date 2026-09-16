@@ -221,7 +221,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     CollectionService.getCollections()
-      .then((res: { data?: Collection[] }) => setCollections(res.data ?? []))
+      .then((res) => setCollections(res.data ?? []))
       .catch(console.error)
   }, [])
 

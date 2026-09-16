@@ -112,7 +112,6 @@ interface SidebarProps {
 export default function Sidebar({
   collections,
   userName = 'User',
-  userHandle = '',
   onNewCollection,
   onEditCollection,
   onDeleteCollection,
@@ -120,7 +119,7 @@ export default function Sidebar({
   const navigate = useNavigate()
   const { collectionId } = useParams()
   const { user } = useAuth()
-  const [activeMenuId, setActiveMenuId] = useState<number | null>(null)
+  const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null)
   const [avatarVersion, setAvatarVersion] = useState(0)
   const [imageError, setImageError] = useState(false)
   const menuRef = useRef<HTMLDivElement | null>(null)

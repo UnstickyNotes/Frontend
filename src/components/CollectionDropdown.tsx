@@ -43,8 +43,8 @@ interface CollectionDropdownProps {
   /** All user collections (excluding the virtual Unsorted). */
   collections: Collection[]
   /** Currently selected collection id. -1 = Unsorted, undefined = nothing pre-selected. */
-  value?: number
-  onChange: (id: number) => void
+  value?: string | number
+  onChange: (id: string | number) => void
   /** Placement hint — 'up' opens the list upward (useful when near page bottom). */
   placement?: 'down' | 'up'
 }

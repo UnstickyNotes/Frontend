@@ -126,7 +126,7 @@ export default function NoteModal({
           <CollectionDropdown
             collections={collections}
             value={selectedCollectionId}
-            onChange={setSelectedCollectionId}
+            onChange={(id) => setSelectedCollectionId(Number(id))}
             placement="up"
           />
         </div>

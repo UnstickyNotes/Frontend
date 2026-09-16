@@ -52,7 +52,7 @@ export default function NoteEditPage() {
 
   useEffect(() => {
     CollectionService.getCollections()
-      .then((res: { data?: Collection[] }) => {
+      .then((res) => {
         const cols = res.data ?? []
         setCollections(cols)
         if (collectionId === '-1') {
@@ -175,7 +175,7 @@ export default function NoteEditPage() {
             <CollectionDropdown
               collections={collections.filter(c => c.id !== -1)}
               value={selectedCollectionId}
-              onChange={setSelectedCollectionId}
+              onChange={(id) => setSelectedCollectionId(Number(id))}
               placement="up"
             />
           </div>

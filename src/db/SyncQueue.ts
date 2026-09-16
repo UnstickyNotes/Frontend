@@ -16,9 +16,15 @@ export const updateQueuePayload = async(payload:object, id:string) => {
     return dbres.rowsAffected
 }
 
-export const dequeue = async (queueID:string) => {
+export const dequeueById = async (queueID:string) => {
     const db = await getDB();
     const dbres = await db.execute("DELETE FROM sync_queue WHERE id = ?", [queueID]);
+    return dbres.rowsAffected
+}
+
+export const dequeue = async (entity_id:string, entity_type:string) => {
+    const db = await getDB();
+    const dbres = await db.execute("DELETE FROM sync_queue WHERE entity_id = ? AND entity_type = ?", [entity_id, entity_type]);
     return dbres.rowsAffected
 }
 

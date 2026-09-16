@@ -9,12 +9,12 @@ import type {
 } from "../types";
 import { generateUniqueName, now } from "./Helpers";
 import { checkUserOffline } from "./AuthService";
-import { dequeue, enqueue, updateQueuePayload } from "../db/SyncQueue";
+import { dequeue, dequeueById, enqueue, updateQueuePayload } from "../db/SyncQueue";
 
 export const getCollections = async() => {
     const user_id = await checkUserOffline()
     const db = await getDB();
-    const dbres = await db.select<Collection[]>("SELECT * FROM collections WHERE user_id = ?", [user_id])
+    const dbres = await db.select<Array<Collection>>("SELECT * FROM collections WHERE user_id = ?", [user_id])
     
     return response(true, 'user collections', dbres)
     // const res = await api.get('/collections');
@@ -89,18 +89,25 @@ export const deleteCollection = async(id:string) => {
     if(!user_id) return response(false, 'no user signed in')
 
     const db = await getDB();
-    const deletedRow = await db.select<Array<Record<string, any>>>(`SELECT * FROM collections WHERE id = ?`, [id])
+    const deletedRow = await db.select<Array<Record<string, any>>>(`SELECT * FROM collections WHERE id = ? AND user_id = ?`, [id, user_id])
+    const deletedRowChildren = await db.select<Record<string, any>[]>(`SELECT id FROM notes WHERE collection_id = ? AND user_id = ?`,[id, user_id])
 
-    const res = await db.execute("DELETE FROM collections WHERE id = ?", [id])
+    const res = await db.execute("DELETE FROM collections WHERE id = ? AND user_id = ?", [id, user_id])
     if(res.rowsAffected){
-        const prevCreate = await db.select<Array<Record<string, any>>>(
+        const prev = await db.select<Array<Record<string, any>>>(
             `SELECT * FROM sync_queue 
             WHERE user_id = ? 
             AND entity_type = ? 
             AND entity_id = ? 
-            AND action = ?`, [user_id, 'collection', id, 'CREATE'])
-        if(prevCreate.length > 0){
-            await dequeue(prevCreate[0].id)
+            AND action IN (?, ?)`, [user_id, 'collection', id, 'CREATE', 'UPDATE'])
+        if(prev.length > 0){
+            const operations = prev.map((i) => {return dequeueById(i.id)})
+            try{
+                await Promise.all(operations)
+            }catch{
+                console.log("promise rejected at delete collection")
+                // ignore
+            }
         }else{
             const queueData:SyncQueueAttrbutes = {
                 user_id:user_id,
@@ -111,6 +118,16 @@ export const deleteCollection = async(id:string) => {
             }
             await enqueue(queueData)
         }
+        // delete any queue of the collection notes
+        // console.log(id)
+        const promises = deletedRowChildren.map((i) => {dequeue(i.id, 'note')})
+        try{
+            Promise.all(promises)
+        }catch{
+            console.log('promise rejected when deleting children notes')
+            //ignore
+        }
+
         return response(true, 'collection deleted', deletedRow[0])
     }
     return response(false, 'couldnt delete collection')

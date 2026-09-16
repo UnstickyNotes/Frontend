@@ -31,11 +31,11 @@ export default function NoteCreatePage() {
 
   useEffect(() => {
     CollectionService.getCollections()
-      .then((res: { data?: Collection[] }) => {
+      .then((res) => {
         const cols = res.data ?? []
         setCollections(cols)
-        if (collectionId === '-1') {
-          setCurrentCollection({ id: -1, name: 'Unsorted' })
+        if (collectionId === null) {
+          setCurrentCollection({ id: null, name: 'Unsorted' })
         } else {
           setCurrentCollection(cols.find(c => String(c.id) === collectionId) ?? null)
         }
@@ -55,7 +55,7 @@ export default function NoteCreatePage() {
       const res = await NoteService.addNote({
         title: title.trim() || undefined,
         body: body.trim() || undefined,
-        collectionId: Number(collectionId),
+        collectionId: Number(collectionId) || undefined,
       })
       const newNote = (res as { data?: { id: number } }).data
       if (newNote) navigate(`/${collectionId}/${newNote.id}`)

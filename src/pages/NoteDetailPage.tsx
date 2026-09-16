@@ -46,7 +46,7 @@ export default function NoteDetailPage() {
 
   useEffect(() => {
     CollectionService.getCollections()
-      .then((res: { data?: Collection[] }) => {
+      .then((res) => {
         const cols = res.data ?? []
         setCollections(cols)
         if (collectionId === '-1') {
