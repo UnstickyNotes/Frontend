@@ -13,10 +13,11 @@
     "windows": [
       {
         "title": "Unsticky Notes",
-        "width": 800,
-        "height": 600,
+        "width": 1600,
+        "height": 1200,
         "resizable": true,
-        "fullscreen": true
+        "fullscreen": false,
+        "devtools":true
       }
     ],
     "security": {

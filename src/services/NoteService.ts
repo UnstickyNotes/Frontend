@@ -1,14 +1,21 @@
+import api from "./api";
+import getDB from "../db/dbClient";
+
 import type { 
     Response,
     Note, 
     NoteAttributes } from "../types";
-import api from "./api";
-
+import { response } from "./Response"
+import { checkUserOffline } from "./AuthService";
+import { now } from "./Helpers";
 
 export const getAllNotes = async() => {
-    const res = await api.get<Response<Note>>('/notes');
-
-    return await res.data;
+    const user_id = await checkUserOffline()
+    const db = await getDB();
+    const dbres = await db.select<Note[]>("SELECT * FROM notes WHERE user_id = ?", [user_id])
+    
+    return response(true, 'user notes', dbres)
+    // const res = await api.get<Response<Note>>('/notes');
 }
 
 export const addNote = async (attr:NoteAttributes) => {

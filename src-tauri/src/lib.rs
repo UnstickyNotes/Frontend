@@ -9,12 +9,12 @@ pub fn run() {
         sql: include_str!("../migrations/1_create_all_tables.sql"),
         kind: MigrationKind::Up
       },
-      Migration {
-        version: 2,
-        description: "create_sync_queue_table",
-        sql: include_str!("../migrations/2_create_sync_queue_table.sql"),
-        kind: MigrationKind::Up
-      },
+      // Migration {
+      //   version: 2,
+      //   description: "create_sync_queue_table",
+      //   sql: include_str!("../migrations/2_create_sync_queue_table.sql"),
+      //   kind: MigrationKind::Up
+      // },
     ];
     tauri::Builder::default()
       .setup(|app| {

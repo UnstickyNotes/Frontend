@@ -5,12 +5,10 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
-    {
-      "identifier":"core:app:allow-identifier",
-      "allow": [
-        { "url": "http://localhost:8000/*" },
-        { "url": "http://127.0.0.1:8000/*" }
-      ]
-    }
+    "sql:default",
+    "sql:allow-select",
+    "sql:allow-execute",
+    "sql:allow-load",
+    "sql:allow-close"
   ]
 }

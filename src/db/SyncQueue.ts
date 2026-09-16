@@ -3,17 +3,22 @@ import type { SyncQueue, SyncQueueAttrbutes } from "../types";
 
 export const enqueue = async (attrs:SyncQueueAttrbutes) => {
     const db = await getDB();
-    const dbres = await db.execute("INSERT INTO sync_queue (entity_type, entity_remote_id, action, payload) "+
-                                    "VALUES ($1, $2, $3, $4)", 
-                                    [attrs.entity_type, attrs.entity_remote_id ?? null, attrs.action, attrs.payload ?? null]);
-    db.close();
+    const dbres = await db.execute("INSERT INTO sync_queue (user_id, entity_type, entity_id, entity_remote_id, action, payload) "+
+                                    "VALUES (?, ?, ?, ?, ?, ?)", 
+                                    [attrs.user_id, attrs.entity_type, attrs.entity_id, attrs.entity_remote_id ?? null, attrs.action, attrs.payload ?? null]);
+    return dbres.rowsAffected
+}
+
+export const updateQueuePayload = async(payload:object, id:string) => {
+    const db = await getDB()
+    const dbres = await db.execute(`UPDATE sync_queue SET payload = ? WHERE id = ?`, [payload, id])
+
     return dbres.rowsAffected
 }
 
 export const dequeue = async (queueID:string) => {
     const db = await getDB();
-    const dbres = await db.execute("DELETE FROM sync_queue WHERE id = $1", [queueID]);
-    db.close()
+    const dbres = await db.execute("DELETE FROM sync_queue WHERE id = ?", [queueID]);
     return dbres.rowsAffected
 }
 
@@ -22,8 +27,7 @@ export const getAllPending = async () => {
     const user_id = Number(localStorage.getItem('user_id'))
 
     if(user_id === -1) console.log("sign in first...stubi")
-        
-    const dbres = await db.select<SyncQueue>("SELECT * FROM sync_queue WHERE user_id = $1",[user_id])
-    db.close()
+
+    const dbres = await db.select<SyncQueue>("SELECT * FROM sync_queue WHERE user_id = ?",[user_id])
     return dbres
 }

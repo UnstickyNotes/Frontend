@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch: # Allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   build-windows:
@@ -17,20 +17,21 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: lts
+          node-version: 'lts/*'
+          cache: 'npm'
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install dependencies
-        run: npm ci # Uses package-lock.json for clean install
+        run: npm ci
 
       - name: Build Tauri Windows Executable
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v__VERSION__ # Auto-generates release tag based on tauri.conf.json
+          tagName: v__VERSION__
           releaseName: "App Release v__VERSION__"
           releaseBody: "Automated Windows build."
           releaseDraft: true

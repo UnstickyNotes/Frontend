@@ -23,7 +23,8 @@ export interface User {
     avatarUrl? : string | null,
     avatar? : string | null,
     created_at? : string,
-    updated_at? : string
+    updated_at? : string,
+    last_synced_at? : string
 }
 
 export interface Collection {
@@ -82,7 +83,9 @@ export interface NoteAttributes {
 }
 
 export interface SyncQueueAttrbutes {
+    user_id : string
     entity_type : string,
+    entity_id : string
     entity_remote_id? : string,
     action : string,
     payload? : object

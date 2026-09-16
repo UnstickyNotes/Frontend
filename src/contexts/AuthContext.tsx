@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.history.replaceState({}, '', window.location.pathname)
       return oauthToken
     }
-    localStorage.setItem('user_id', (user as any)?.id ?? -1);
+    localStorage.setItem('user', JSON.stringify(user));
     return localStorage.getItem('un-token')
   })
 
@@ -57,6 +57,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const userData = (res as any)?.data ?? res
           if (userData && (userData.id || userData.email)) {
             setUser(userData)
+            localStorage.setItem('user_id', userData.id)
+            AuthService.register_user_offline(userData)
           }
         })
         .catch(() => {
@@ -84,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userData = (profileRes as any)?.data ?? profileRes
       if (userData && (userData.id || userData.email)) {
         setUser(userData)
+        localStorage.setItem('user_id', userData.id)
       }
     } catch {
       // Profile can be fetched by useEffect if needed
@@ -109,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userData = (res as any)?.data ?? res
       if (userData && (userData.id || userData.email)) {
         setUser(userData)
+        localStorage.setItem('user_id', userData.id)
       }
     } catch (err) {
       console.warn('Failed to refresh user:', err)
