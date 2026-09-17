@@ -32,7 +32,7 @@ interface AppLayoutProps {
   onNewCollection?: () => void
   onCollectionCreated?: (collection: Collection) => void
   onCollectionUpdated?: (collection: Collection) => void
-  onCollectionDeleted?: (collectionId: string | number) => void
+  onCollectionDeleted?: (collectionId: string | number | null) => void
   /** Extra controls to render in the topbar right slot (e.g. icon buttons) */
   topbarLeft?: ReactNode
   topbarRight?: ReactNode

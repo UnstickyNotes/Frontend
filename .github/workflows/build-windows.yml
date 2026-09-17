@@ -9,6 +9,10 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
+    
+    # 1. REQUIRED: Explicit write permissions to create the release
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -19,11 +23,20 @@ jobs:
         with:
           node-version: 'lts/*'
           cache: 'npm'
+          cache-dependency-path: Frontend/package-lock.json
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
+      # 2. HIGHLY RECOMMENDED: Cache Rust build files
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "Frontend/src-tauri -> target"
+
+      # 3. FIXED: Target the correct project directory
       - name: Install dependencies
+        working-directory: ./Frontend
         run: npm ci
 
       - name: Build Tauri Windows Executable
@@ -31,8 +44,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          # 3. FIXED: Tell the action where the Tauri project lives
+          projectPath: "./Frontend"
           tagName: v__VERSION__
           releaseName: "App Release v__VERSION__"
           releaseBody: "Automated Windows build."
           releaseDraft: true
           prerelease: false
+          # 4. OPTIONAL: Tell Tauri to only build the .exe installer (skips the .msi file)
+          args: --bundles nsis

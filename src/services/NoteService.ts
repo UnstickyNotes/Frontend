@@ -1,14 +1,12 @@
-import api from "./api";
 import getDB from "../db/dbClient";
 
 import type { 
-    Response,
     Note, 
     NoteAttributes,
     SyncQueueAttrbutes } from "../types";
 import { response } from "./Response"
 import { checkUserOffline } from "./AuthService";
-import { enqueue, dequeue, dequeueById, updateQueuePayload } from "../db/SyncQueue";
+import { enqueue, dequeueById, updateQueuePayload } from "../db/SyncQueue";
 import { now } from "./Helpers";
 
 export const getAllNotes = async() => {

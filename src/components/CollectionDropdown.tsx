@@ -44,7 +44,7 @@ interface CollectionDropdownProps {
   collections: Collection[]
   /** Currently selected collection id. -1 = Unsorted, undefined = nothing pre-selected. */
   value?: string | number
-  onChange: (id: string | number) => void
+  onChange: (id: string | number | null) => void
   /** Placement hint — 'up' opens the list upward (useful when near page bottom). */
   placement?: 'down' | 'up'
 }

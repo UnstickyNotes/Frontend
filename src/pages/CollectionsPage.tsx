@@ -91,7 +91,7 @@ export default function CollectionsPage() {
     }
   }
 
-  const handleCollectionDeleted = (id: string | number) => {
+  const handleCollectionDeleted = (id: string | number | null) => {
     setCollections(prev => prev.filter(c => c.id !== id))
     if (String(currentCollection?.id) === String(id)) {
       setCurrentCollection({ id: -1, name: 'Unsorted' })

@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router'
 import { useAuth } from '../contexts/AuthContext'
 import AuthPage from '../pages/AuthPage'
+import OAuthErrorPage from '../pages/OAuthErrorPage'
 import CollectionsPage from '../pages/CollectionsPage'
 import NoteDetailPage from '../pages/NoteDetailPage'
 import NoteCreatePage from '../pages/NoteCreatePage'
@@ -56,10 +57,15 @@ const router = createBrowserRouter([
     element: <RequireAuth><NoteEditPage /></RequireAuth>,
   },
   {
-    // Backend redirects here after Google OAuth. Token was already extracted
-    // by AuthContext before routing runs — just send the user home.
+    // Backend redirects here after Google OAuth.
+    // If the URL contains ?error=, send the user to the error page.
+    // Otherwise AuthContext already extracted ?token= — send home.
     path: '/oauth/callback',
-    element: <Navigate to="/" replace />,
+    element: <Navigate to={typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('error') ? `/oauth/error${window.location.search}` : '/'} replace />,
+  },
+  {
+    path: '/oauth/error',
+    element: <OAuthErrorPage />,
   },
   {
     path: '*',
