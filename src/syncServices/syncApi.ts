@@ -1,15 +1,17 @@
 import api from "../services/api";
-import type { PushAttributes, PushResponse } from "../types";
+import type { PullResponse, PushResponse, SyncQueueAttrbutes } from "../types";
 
 export const pull = async (last_synced_at:string, userID:string) => {
-    const res = await api.get(`/sync/pull/${userID}/${last_synced_at}`);
-
+    const url = (last_synced_at) 
+        ? `/sync/pull/${userID}?last_synced_at=${last_synced_at}`
+        : `/sync/pull/${userID}`
+    const res = await api.get<PullResponse>(url);
     return res.data;
 }
 
-export const push = async (attrs:PushAttributes) => {
-    const payload = JSON.stringify(attrs)
-    const res = await api.post<PushResponse>('/sync/push', payload)
+export const push = async (attrs:SyncQueueAttrbutes[], user_id:string) => {
+    const data = JSON.stringify(attrs)
+    const res = await api.post<PushResponse>(`/sync/push/${user_id}`, data)
 
     return res.data
 }

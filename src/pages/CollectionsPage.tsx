@@ -10,6 +10,7 @@ import { useAuth } from '../contexts/AuthContext'
 import * as CollectionService from '../services/CollectionService'
 import * as NoteService from '../services/NoteService'
 import type { Collection, Note } from '../types'
+// import { requestPull } from '../syncServices/SyncManager'
 
 export default function CollectionsPage() {
   const { collectionId } = useParams()
@@ -33,10 +34,10 @@ export default function CollectionsPage() {
   useEffect(() => {
     CollectionService.getCollections()
       .then((res) => {
-        const cols: Collection[] = res.data ?? []
+        const cols: Collection[] = (res as { data?: Collection[] }).data ?? []
         setCollections(cols)
         if (collectionId) {
-          if (collectionId === '-1') {
+          if (collectionId == '-1') {
             setCurrentCollection({ id: -1, name: 'Unsorted' })
           } else {
             const found = cols.find(c => String(c.id) === collectionId) ?? null
@@ -58,7 +59,7 @@ export default function CollectionsPage() {
         const allNotes: Note[] = (res as { data?: Note[] }).data ?? []
         if (collectionId) {
           const filtered = allNotes.filter(n => {
-            const cId = n.collection_id ?? n.collectionId
+            const cId = n.collection_id
             if (collectionId === '-1') {
               return cId === -1 || cId === null || cId === undefined
             }
@@ -120,7 +121,7 @@ export default function CollectionsPage() {
         title: data.title || undefined,
         body: data.body || undefined,
         collection_id: newColId === -1 ? undefined : newColId,
-        collectionId: newColId === -1 ? undefined : newColId,
+        // collectionId: newColId === -1 ? undefined : newColId,
       })
       const updated = (res as { data?: Note }).data ?? {
         ...editingNote,
@@ -142,7 +143,7 @@ export default function CollectionsPage() {
       const res = await NoteService.addNote({
         title: data.title || undefined,
         body: data.body || undefined,
-        collectionId: targetColId,
+        // collectionId: targetColId,
         collection_id: targetColId === -1 ? undefined : targetColId,
       })
       const created = (res as { data?: Note }).data
@@ -150,13 +151,13 @@ export default function CollectionsPage() {
       const currentViewColId = collectionId === '-1' ? -1 : Number(collectionId)
       if (created && (created.title || created.id) && targetColId === currentViewColId) {
         setNotes(prev => [
+          ...prev,
           {
             id: created.id,
             title: created.title || data.title || 'Untitled',
             body: created.body ?? data.body,
             collection_id: created.collection_id ?? targetColId,
           },
-          ...prev,
         ])
       } else {
         // Fallback refresh (covers cross-collection creates)
@@ -204,6 +205,7 @@ export default function CollectionsPage() {
     >
       <div className="main-scroll">
         <h1 className="collections-title">{title}</h1>
+        {/* <button onClick={requestPull}>pull</button> */}
         <p className="collections-count">
           {loading ? 'Loading…' : noteCount === 0 ? 'No cards yet' : `${noteCount} card${noteCount !== 1 ? 's' : ''}`}
         </p>

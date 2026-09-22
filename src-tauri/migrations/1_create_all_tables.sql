@@ -1,10 +1,10 @@
--- Entity: Users
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY,
+    -- remote_id INTEGER UNIQUE NULL, 
     first_name TEXT NOT NULL,
     last_name TEXT NULL,
     email TEXT NOT NULL UNIQUE,
-    last_synced_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    last_synced_at DATETIME NULL
 );
 
 -- Entity: Collections

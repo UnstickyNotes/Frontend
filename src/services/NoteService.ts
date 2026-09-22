@@ -10,7 +10,9 @@ import { enqueue, dequeueById, updateQueuePayload } from "../db/SyncQueue";
 import { now } from "./Helpers";
 
 export const getAllNotes = async() => {
-    const user_id = await checkUserOffline()
+    const user = await checkUserOffline()
+    if(!user) return response(false, 'no user signed in')
+    const user_id = user[0].id
     const db = await getDB();
     const dbres = await db.select<Note[]>("SELECT * FROM notes WHERE user_id = ?", [user_id])
     
@@ -18,10 +20,10 @@ export const getAllNotes = async() => {
     // const res = await api.get<Response<Note>>('/notes');
 }
 
-export const addNote = async (attr:NoteAttributes) => {
-    const user_id = await checkUserOffline()
-
-    if(!user_id) return response(false, 'no user signed in')
+export const addNote = async (attr:NoteAttributes, isPull:boolean = false) => {
+    const user = await checkUserOffline()
+    if(!user) return response(false, 'no user signed in')
+    const user_id = user[0].id
 
     const db = await getDB()
     const dbres = await db.execute(`INSERT INTO notes (user_id, collection_id, title, body)VALUES (?, ?, ?, ?)`, 
@@ -55,9 +57,9 @@ export const addNote = async (attr:NoteAttributes) => {
 }
 
 export const getNote = async (id: string | number) => {
-    const user_id = await checkUserOffline()
-
-    if(!user_id) return response(false, 'no user signed in')
+    const user = await checkUserOffline()
+    if(!user) return response(false, 'no user signed in')
+    const user_id = user[0].id
     
     const db = await getDB()
     const dbres = await db.select<Note[]>(`SELECT * FROM notes WHERE id = ? AND user_id = ?`, [id, user_id])
@@ -70,9 +72,9 @@ export const getNote = async (id: string | number) => {
 }
 
 export const updateNote = async(id: string | number, attr:NoteAttributes) => {
-    const user_id = await checkUserOffline()
-
-    if(!user_id) return response(false, 'no user signed in')
+    const user = await checkUserOffline()
+    if(!user) return response(false, 'no user signed in')
+    const user_id = user[0].id
 
     const db = await getDB()
     const res = await db.execute(`
@@ -117,9 +119,9 @@ export const updateNote = async(id: string | number, attr:NoteAttributes) => {
 }
 
 export const deleteNote = async (id: string | number) => {
-    const user_id = await checkUserOffline()
-
-    if(!user_id) return response(false, 'no user signed in')
+    const user = await checkUserOffline()
+    if(!user) return response(false, 'no user signed in')
+    const user_id = user[0].id
 
     const db = await getDB();
     const deletedRow = await db.select<Array<Record<string, any>>>(`SELECT * FROM notes WHERE id = ? AND user_id = ?`, [id, user_id])

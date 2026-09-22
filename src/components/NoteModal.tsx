@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type KeyboardEvent } from 'react'
 import Modal from './Modal'
 import CollectionDropdown from './CollectionDropdown'
 import type { Collection } from '../types'
@@ -40,6 +40,13 @@ export default function NoteModal({
       setSelectedCollectionId(initialCollectionId)
       setError('')
       setLoading(false)
+      // window.addEventListener('keydown', (e)=>{
+      //   if(e.key === 'Enter') onSubmit({
+      //     title: initialTitle.trim(),
+      //     body: initialBody.trim(),
+      //     collectionId: initialCollectionId
+      //   })
+      // })
     }
   }, [isOpen, initialTitle, initialBody, initialCollectionId])
 

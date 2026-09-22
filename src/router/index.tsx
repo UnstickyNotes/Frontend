@@ -62,6 +62,7 @@ const router = createBrowserRouter([
     // Otherwise AuthContext already extracted ?token= — send home.
     path: '/oauth/callback',
     element: <Navigate to={typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('error') ? `/oauth/error${window.location.search}` : '/'} replace />,
+    // element: <Navigate to={'/'} replace />,
   },
   {
     path: '/oauth/error',

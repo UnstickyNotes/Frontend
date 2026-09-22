@@ -29,6 +29,7 @@ export interface User {
 
 export interface Collection {
     id : string | number | null,
+    remote_id? : number
     name : string,
     user_id? : number,
     created_at? : string,
@@ -72,14 +73,19 @@ export interface UserAttributes {
 }
 
 export interface CollectionAttributes {
+    user_id? : number
+    remote_id? : number
+    local_id? : number
     name : string
 }
 
 export interface NoteAttributes {
+    user_id? : number
+    remote_id? : number
+    local_id? : number
     title? : string,
     body? : string,
     collection_id? : number,
-    collectionId? : number
 }
 
 export interface SyncQueueAttrbutes {
@@ -92,7 +98,8 @@ export interface SyncQueueAttrbutes {
 }
 
 export interface SyncQueue {
-    id:string,
+    id : string,
+    user_id : string,
     entity_name : string,
     entity_remote_id? : string,
     action : string, 
@@ -100,9 +107,18 @@ export interface SyncQueue {
     created_at : string
 }
 
-export interface PushAttributes {
-    user_id : string,
-    payload : string
+interface PushResData {
+    synced_at : string
+    passed: Record<string, any>
+    failed: Record<string, any>
+    unauthorized: number
+}
+interface PullResData {
+    last_synced_at_server : string
+    collections : string
+    notes : string
 }
 
-export type PushResponse = Response<PushAttributes>
+export type PushResponse = Response<PushResData>
+
+export type PullResponse = Response<PullResData>

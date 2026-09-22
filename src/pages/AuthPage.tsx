@@ -4,7 +4,7 @@ import { useTheme } from '../contexts/ThemeContext'
 import { useAuth } from '../contexts/AuthContext'
 import PasswordInput from '../components/PasswordInput'
 
-// import { isOnline } from '../syncServices/SyncManager';
+// import { useOnlineStatus } from '../contexts/OnlineContext' 
 
 function GoogleLogo() {
   return (
@@ -199,7 +199,7 @@ function SignUpForm() {
 export default function AuthPage() {
   const { theme, toggleTheme } = useTheme()
   const [signUpActive, setSignUpActive] = useState(false)
-  // const status = isOnline()
+  // const status = useOnlineStatus()
 
   return (
     <div className={`auth-page${theme === 'dark' ? ' dark-auth' : ''}`}>

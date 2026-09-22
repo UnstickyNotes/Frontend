@@ -5,6 +5,7 @@ import {
   useEffect,
   type ReactNode,
 } from 'react'
+import { requestPull } from '../syncServices/SyncManager'
 import type { User, LoginCredentials, RegisterCredentials } from '../types'
 import * as AuthService from '../services/AuthService'
 import * as ProfileService from '../services/ProfileService'
@@ -59,6 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(userData)
             localStorage.setItem('user_id', userData.id)
             AuthService.register_user_offline(userData)
+            requestPull()
           }
         })
         .catch(() => {
@@ -80,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     localStorage.setItem('un-token', tok)
     setToken(tok)
+    requestPull()
 
     try {
       const profileRes = await ProfileService.getProfile()

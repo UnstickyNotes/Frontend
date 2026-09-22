@@ -14,11 +14,11 @@ export const checkUserOffline = async() => {
 
     if(!user_id) return ''
 
-    const userEmail:Array<string> = await db.select(`SELECT email FROM users WHERE id = ?`, [user_id]);
+    const user:Record<string, any>[] = await db.select(`SELECT * FROM users WHERE id = ?`, [user_id]);
 
-    if(userEmail.length == 0) return ''
+    if(user.length == 0) return ''
 
-    return user_id
+    return user
 }
 
 export const register_user_offline = async(user:User) => {
@@ -26,18 +26,15 @@ export const register_user_offline = async(user:User) => {
         return false
     }
     const db = await getDB()
-    const user_id = await checkUserOffline()
-    if(!user_id){
+    const userOffline = await checkUserOffline()
+    if(!userOffline){
         const res = await db.execute(`INSERT INTO users (id, first_name, last_name, email, last_synced_at)
                                     VALUES (?, ?, ?, ?, ?)`, [user.id, user.first_name, user.last_name, user.email, user.last_synced_at]);
-        if (res.rowsAffected){
-            console.log("success")
+        if (res.rowsAffected){  
             return user
         }
-        console.log("unable to create user")
         return false
     }
-    console.log(user)
     return user
 }
 

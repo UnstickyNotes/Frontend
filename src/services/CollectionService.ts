@@ -12,7 +12,9 @@ import { checkUserOffline } from "./AuthService";
 import { dequeue, dequeueById, enqueue, updateQueuePayload } from "../db/SyncQueue";
 
 export const getCollections = async() => {
-    const user_id = await checkUserOffline()
+    const user = await checkUserOffline()
+    if(!user) return response(false, 'no user signed in')
+    const user_id = user[0].id
     const db = await getDB();
     const dbres = await db.select<Array<Collection>>("SELECT * FROM collections WHERE user_id = ?", [user_id])
     
@@ -21,9 +23,9 @@ export const getCollections = async() => {
 }
 
 export const addCollection = async(attr:CollectionAttributes) => {
-    const user_id = await checkUserOffline()
-
-    if(!user_id) return response(false, 'no user signed in')
+    const user = await checkUserOffline()
+    if(!user) return response(false, 'no user signed in')
+    const user_id = user[0].id
 
     const db = await getDB()
     const uniqueName = await generateUniqueName(attr.name, user_id)
@@ -48,9 +50,9 @@ export const addCollection = async(attr:CollectionAttributes) => {
 }
 
 export const updateCollection = async(attr:CollectionAttributes, id:string) => {
-    const user_id = await checkUserOffline()
-
-    if(!user_id) return response(false, 'no user signed in')
+    const user = await checkUserOffline()
+    if(!user) return response(false, 'no user signed in')
+    const user_id = user[0].id
 
     const db = await getDB()
     const res = await db.execute("UPDATE collections SET name = ?, updated_at = ? WHERE id = ?",[attr.name, now(), id])
@@ -84,9 +86,9 @@ export const updateCollection = async(attr:CollectionAttributes, id:string) => {
 }
 
 export const deleteCollection = async(id:string) => {
-    const user_id = await checkUserOffline()
-
-    if(!user_id) return response(false, 'no user signed in')
+    const user = await checkUserOffline()
+    if(!user) return response(false, 'no user signed in')
+    const user_id = user[0].id
 
     const db = await getDB();
     const deletedRow = await db.select<Array<Record<string, any>>>(`SELECT * FROM collections WHERE id = ? AND user_id = ?`, [id, user_id])
