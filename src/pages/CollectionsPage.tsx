@@ -10,7 +10,7 @@ import { useAuth } from '../contexts/AuthContext'
 import * as CollectionService from '../services/CollectionService'
 import * as NoteService from '../services/NoteService'
 import type { Collection, Note } from '../types'
-// import { requestPull } from '../syncServices/SyncManager'
+import { requestPull, requestPush } from '../syncServices/SyncManager'
 
 export default function CollectionsPage() {
   const { collectionId } = useParams()
@@ -205,7 +205,8 @@ export default function CollectionsPage() {
     >
       <div className="main-scroll">
         <h1 className="collections-title">{title}</h1>
-        {/* <button onClick={requestPull}>pull</button> */}
+        <button onClick={requestPush}>push</button>
+        <button onClick={requestPull}>pull</button>
         <p className="collections-count">
           {loading ? 'Loading…' : noteCount === 0 ? 'No cards yet' : `${noteCount} card${noteCount !== 1 ? 's' : ''}`}
         </p>

@@ -10,8 +10,9 @@ export const pull = async (last_synced_at:string, userID:string) => {
 }
 
 export const push = async (attrs:SyncQueueAttrbutes[], user_id:string) => {
-    const data = JSON.stringify(attrs)
-    const res = await api.post<PushResponse>(`/sync/push/${user_id}`, data)
+    const data = {'data' : JSON.stringify(attrs)};
+    console.log(data)
 
+    const res = await api.post<PushResponse>(`/sync/push/${user_id}`, data)
     return res.data
 }

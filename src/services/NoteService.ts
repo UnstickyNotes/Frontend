@@ -20,7 +20,7 @@ export const getAllNotes = async() => {
     // const res = await api.get<Response<Note>>('/notes');
 }
 
-export const addNote = async (attr:NoteAttributes, isPull:boolean = false) => {
+export const addNote = async (attr:NoteAttributes) => {
     const user = await checkUserOffline()
     if(!user) return response(false, 'no user signed in')
     const user_id = user[0].id

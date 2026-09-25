@@ -16,7 +16,7 @@ export const getCollections = async() => {
     if(!user) return response(false, 'no user signed in')
     const user_id = user[0].id
     const db = await getDB();
-    const dbres = await db.select<Array<Collection>>("SELECT * FROM collections WHERE user_id = ?", [user_id])
+    const dbres = await db.select<Collection[]>("SELECT * FROM collections WHERE user_id = ?", [user_id])
     
     return response(true, 'user collections', dbres)
     // const res = await api.get('/collections');
@@ -29,17 +29,22 @@ export const addCollection = async(attr:CollectionAttributes) => {
 
     const db = await getDB()
     const uniqueName = await generateUniqueName(attr.name, user_id)
-    const dbres = await db.execute(`INSERT INTO collections (user_id, name)VALUES (?, ?)`, [user_id, uniqueName])
+    const dbres = await db.execute(
+        `INSERT INTO collections (user_id, name)
+        VALUES (?, ?)`, [user_id, uniqueName])
     if(dbres.rowsAffected){
-        const insertedRow = await db.select<Array<Record<string, any>>>("SELECT * FROM collections WHERE user_id = ? ORDER BY created_at DESC LIMIT 1", [user_id])
-        console.log(insertedRow[0])
+        const insertedRow = await db.select<Record<string, any>[]>(
+            `SELECT * FROM collections 
+            WHERE user_id = ? 
+            ORDER BY created_at DESC 
+            LIMIT 1`, [user_id])
         const queueData:SyncQueueAttrbutes = {
             user_id:user_id,
             entity_type:'collection',
             entity_id: insertedRow[0].id,
             entity_remote_id:insertedRow[0].remote_id,
             action:'CREATE',
-            payload:{name:attr.name}
+            payload:{name:uniqueName}
         }
         await enqueue(queueData)
 
@@ -55,10 +60,19 @@ export const updateCollection = async(attr:CollectionAttributes, id:string) => {
     const user_id = user[0].id
 
     const db = await getDB()
-    const res = await db.execute("UPDATE collections SET name = ?, updated_at = ? WHERE id = ?",[attr.name, now(), id])
+    const uniqueName = await generateUniqueName(attr.name, user_id);
+    const res = await db.execute(`
+        UPDATE collections 
+        SET name = ?, updated_at = ? 
+        WHERE id = ?`,[uniqueName, now(), id])
     
     if(res.rowsAffected){
-        const updatedRow = await db.select<Array<Record<string, any>>>("SELECT * FROM collections WHERE user_id = ? AND id = ? ORDER BY updated_at DESC LIMIT 1", [user_id, id])
+        const updatedRow = await db.select<Array<Record<string, any>>>(
+            `SELECT * FROM collections 
+            WHERE user_id = ? 
+            AND id = ? 
+            ORDER BY updated_at DESC 
+            LIMIT 1`, [user_id, id])
         // console.log(updatedRow[0])
         const queueData:SyncQueueAttrbutes = {
             user_id:user_id,
@@ -66,7 +80,7 @@ export const updateCollection = async(attr:CollectionAttributes, id:string) => {
             entity_id: updatedRow[0].id,
             entity_remote_id:updatedRow[0].remote_id,
             action:'UPDATE',
-            payload:{name:attr.name}
+            payload:{name:uniqueName}
         }
         const prevUpdates = await db.select<Array<Record<string, any>>>(`
             SELECT * FROM sync_queue 
@@ -91,17 +105,35 @@ export const deleteCollection = async(id:string) => {
     const user_id = user[0].id
 
     const db = await getDB();
-    const deletedRow = await db.select<Array<Record<string, any>>>(`SELECT * FROM collections WHERE id = ? AND user_id = ?`, [id, user_id])
-    const deletedRowChildren = await db.select<Record<string, any>[]>(`SELECT id FROM notes WHERE collection_id = ? AND user_id = ?`,[id, user_id])
+    const deletedRow = await db.select<Record<string, any>[]>(
+        `SELECT * FROM collections 
+        WHERE id = ? 
+        AND user_id = ?`, [id, user_id])
+    const deletedRowChildren = await db.select<Record<string, any>[]>(
+        `SELECT id FROM notes 
+        WHERE collection_id = ? 
+        AND user_id = ?`,[id, user_id])
 
     const res = await db.execute("DELETE FROM collections WHERE id = ? AND user_id = ?", [id, user_id])
     if(res.rowsAffected){
-        const prev = await db.select<Array<Record<string, any>>>(
-            `SELECT * FROM sync_queue 
+        const prev = await db.select<Record<string, any>[]>(
+            `SELECT * FROM sync_queue s 
             WHERE user_id = ? 
             AND entity_type = ? 
             AND entity_id = ? 
-            AND action IN (?, ?)`, [user_id, 'collection', id, 'CREATE', 'UPDATE'])
+            AND (
+                action = ? OR (
+                action = ? AND EXISTS (
+                    SELECT 1
+                    FROM sync_queue q
+                    WHERE q.user_id = s.user_id
+                        AND q.entity_type = s.entity_type
+                        AND q.entity_id = s.entity_id
+                        AND action = ?
+                    )
+                )
+            )`, [user_id, 'collection', id, 'CREATE', 'UPDATE', 'CREATE'])
+        console.log(prev)
         if(prev.length > 0){
             const operations = prev.map((i) => {return dequeueById(i.id)})
             try{
@@ -124,7 +156,7 @@ export const deleteCollection = async(id:string) => {
         // console.log(id)
         const promises = deletedRowChildren.map((i) => {dequeue(i.id, 'note')})
         try{
-            Promise.all(promises)
+            await Promise.all(promises)
         }catch{
             console.log('promise rejected when deleting children notes')
             //ignore

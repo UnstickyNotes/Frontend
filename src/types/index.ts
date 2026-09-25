@@ -109,8 +109,8 @@ export interface SyncQueue {
 
 interface PushResData {
     synced_at : string
-    passed: Record<string, any>
-    failed: Record<string, any>
+    passed: Record<string, any>[],
+    failed: Record<string, any>[],
     unauthorized: number
 }
 interface PullResData {
