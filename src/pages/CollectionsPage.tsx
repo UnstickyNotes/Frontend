@@ -15,7 +15,7 @@ import { requestPull, requestPush } from '../syncServices/SyncManager'
 export default function CollectionsPage() {
   const { collectionId } = useParams()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user,pulled } = useAuth()
 
   const [collections, setCollections] = useState<Collection[]>([])
   const [notes, setNotes] = useState<Note[]>([])
@@ -49,7 +49,7 @@ export default function CollectionsPage() {
         }
       })
       .catch(console.error)
-  }, [collectionId, navigate])
+  }, [collectionId, navigate, pulled])
 
   // Load notes for the active collection
   useEffect(() => {
@@ -72,7 +72,7 @@ export default function CollectionsPage() {
       })
       .catch(console.error)
       .finally(() => setLoading(false))
-  }, [collectionId])
+  }, [collectionId, pulled])
 
   const [newCollectionOpen, setNewCollectionOpen] = useState(false)
 

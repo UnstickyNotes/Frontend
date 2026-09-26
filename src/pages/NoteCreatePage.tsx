@@ -55,7 +55,7 @@ export default function NoteCreatePage() {
       const res = await NoteService.addNote({
         title: title.trim() || undefined,
         body: body.trim() || undefined,
-        collectionId: Number(collectionId) || undefined,
+        collection_id: Number(collectionId) || undefined,
       })
       const newNote = (res as { data?: { id: number } }).data
       if (newNote) navigate(`/${collectionId}/${newNote.id}`)

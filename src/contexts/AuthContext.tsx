@@ -5,7 +5,7 @@ import {
   useEffect,
   type ReactNode,
 } from 'react'
-import { requestPull } from '../syncServices/SyncManager'
+import { requestPush, requestPull, automatePush } from '../syncServices/SyncManager'
 import type { User, LoginCredentials, RegisterCredentials } from '../types'
 import * as AuthService from '../services/AuthService'
 import * as ProfileService from '../services/ProfileService'
@@ -14,6 +14,7 @@ interface AuthContextValue {
   user: User | null
   token: string | null
   isLoading: boolean
+  pulled: boolean
   login: (creds: LoginCredentials) => Promise<void>
   register: (creds: RegisterCredentials) => Promise<void>
   logout: () => Promise<void>
@@ -24,6 +25,7 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   token: null,
   isLoading: true,
+  pulled:false,
   login: async () => {},
   register: async () => {},
   logout: async () => {},
@@ -32,9 +34,7 @@ const AuthContext = createContext<AuthContextValue>({
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-
-  // On first load also check for ?token= in the URL — this is how the backend
-  // returns the token after a successful Google OAuth redirect.
+  const [pulled, setPulled] = useState<boolean>(false);
   const [token, setToken] = useState<string | null>(() => {
     const params = new URLSearchParams(window.location.search)
     const oauthToken = params.get('token')
@@ -61,6 +61,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             localStorage.setItem('user_id', userData.id)
             AuthService.register_user_offline(userData)
             requestPull()
+              .then((res) => {
+                if(res){
+                  setPulled(res)
+                }
+              })
+              .catch((err) => console.log(err))
           }
         })
         .catch(() => {
@@ -68,11 +74,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setToken(null)
           setUser(null)
         })
-        .finally(() => setIsLoading(false))
+        .finally(() => {
+        setIsLoading(false)
+      })
     } else {
       setIsLoading(false)
     }
-  }, [token, user])
+  }, [token, user, pulled])
 
   const login = async (creds: LoginCredentials) => {
     const res = await AuthService.login(creds)
@@ -82,7 +90,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     localStorage.setItem('un-token', tok)
     setToken(tok)
-    requestPull()
 
     try {
       const profileRes = await ProfileService.getProfile()
@@ -90,6 +97,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (userData && (userData.id || userData.email)) {
         setUser(userData)
         localStorage.setItem('user_id', userData.id)
+        requestPull()
+          .then((res) => {
+            setPulled(res)
+          })
       }
     } catch {
       // Profile can be fetched by useEffect if needed
@@ -107,6 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('user_id')
     setToken(null)
     setUser(null)
+    setPulled(false)
   }
 
   const refreshUser = async () => {
@@ -123,7 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, register, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, token, isLoading, pulled, login, register, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )

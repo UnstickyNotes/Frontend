@@ -11,6 +11,7 @@ export const requestPull = async() => {
         const db = await getDB();
         const user = await checkUserOffline()
         if (!user) {
+            // console.log('no user')
             return false;
         }
         const user_id = user[0].id;
@@ -20,6 +21,7 @@ export const requestPull = async() => {
         const last_synced_at:string = new Date(String(user[0].last_synced_at)).toISOString()
         const res = await pull(last_synced_at, user_id);
         if(!res.status){
+            // console.log(res.data)
             return false
         }
         else if(res.message === 'Up to date'){
@@ -99,4 +101,10 @@ export const requestPush = async() => {
     else{
         return false
     }
+}
+
+export const automatePush = async() => {
+    return setInterval(async() => {
+        await requestPush()
+    }, 5000);
 }
