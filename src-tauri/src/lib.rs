@@ -1,5 +1,7 @@
 use tauri_plugin_sql::{Migration, MigrationKind};
-use tauri_plugin_deep_link;
+use tauri_plugin_opener;
+use tauri_plugin_single_instance;
+use tauri::{Manager,Emitter};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -34,6 +36,21 @@ pub fn run() {
                 .build(),
       )
       .plugin(tauri_plugin_deep_link::init())
+      .plugin(tauri_plugin_opener::init())
+      .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.set_focus();
+            }
+
+            // 2. Forward the CLI deep-link argument to the JS listener
+            // On Linux, the OS passes 'unstickynotes://...' as args[1] to the new process
+            if let Some(url) = args.get(1) {
+                if url.starts_with("unstickynotes://") {
+                    // `@tauri-apps/plugin-deep-link` listens for this exact event name and payload shape
+                    let _ = app.emit("deep-link://new-url", vec![url]);
+                }
+            }
+        }))
       .run(tauri::generate_context!())
       .expect("error while running tauri application");
   }

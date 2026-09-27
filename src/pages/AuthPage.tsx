@@ -157,11 +157,13 @@ function SignUpForm() {
 
   // Google OAuth: redirect the browser to the backend. AuthContext will pick
   // up the returned ?token= from the URL when Google redirects back.
-  const handleGoogleAuth = () => {
+  const handleGoogleAuth = async() => {
     setGoogleLoading(true)
-    setTimeout(() => {
-      window.location.href = 'http://localhost:8000/api/OAuth/google/redirect'
-    }, 80)
+    // setTimeout(() => {
+    //   window.location.href = 'http://localhost:8000/api/OAuth/google/redirect'
+    // }, 80)
+    const url = "http://localhost:8000/api/OAuth/google/redirect"
+    await openUrl(url)
   }
 
   return (

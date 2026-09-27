@@ -10,6 +10,7 @@
     "sql:allow-execute",
     "sql:allow-load",
     "sql:allow-close",
-    "deep-link:default"
+    "deep-link:default",
+    "opener:default"
   ]
 }

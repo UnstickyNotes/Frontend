@@ -9,7 +9,7 @@ import { requestPull, requestPush } from '../syncServices/SyncManager'
 import type { User, LoginCredentials, RegisterCredentials } from '../types'
 import * as AuthService from '../services/AuthService'
 import * as ProfileService from '../services/ProfileService'
-import { onOpenUrl } from '@tauri-apps/plugin-deep-link'
+import { onOpenUrl, getCurrent } from '@tauri-apps/plugin-deep-link'
 
 interface AuthContextValue {
   user: User | null
@@ -113,12 +113,17 @@ useEffect(() => {
 
 useEffect(() => {
   let unlisten: () => void
-    const processUrl = async(url:string) => {
-      try{
-        const parsedUrl = new URL(url)
-        if(parsedUrl.host == 'callback' || parsedUrl.pathname.includes('callback')){
-          const token = parsedUrl.searchParams.get('token')
-          if(token){
+  console.log("in effect")
+  const processUrl = async(url:string) => {
+    console.log('url received - '+url)
+    try{
+      const parsedUrl = new URL(url)
+      console.log(parsedUrl)
+      if(parsedUrl.host == 'callback' || parsedUrl.pathname.includes('callback')){
+        console.log('finding token....')
+        const token = parsedUrl.searchParams.get('token')
+        if(token){
+          console.log("found: " + token)
             localStorage.setItem('un-token', token)
             setToken(token)
           }
@@ -129,6 +134,11 @@ useEffect(() => {
     }
 
     const listner = async () => {
+      const initialUrls = await getCurrent();
+      if (initialUrls && initialUrls.length > 0) {
+        processUrl(initialUrls[0]);
+      }
+
       unlisten = await onOpenUrl((urls) => {
         if(urls.length > 0){
           processUrl(urls[0])
@@ -139,7 +149,7 @@ useEffect(() => {
     return () => {
       if(unlisten) unlisten()
     }
-},[setToken])
+},[])
 
   const login = async (creds: LoginCredentials) => {
     const res = await AuthService.login(creds)

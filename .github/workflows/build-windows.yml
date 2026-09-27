@@ -23,7 +23,9 @@ jobs:
         with:
           node-version: 'lts/*'
           cache: 'npm'
-          cache-dependency-path: Frontend/package-lock.json
+          # cache-dependency-path: Frontend/package-lock.json
+          cache-dependency-path: '**/package-lock.json'
+
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
