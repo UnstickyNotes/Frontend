@@ -5,10 +5,11 @@ import {
   useEffect,
   type ReactNode,
 } from 'react'
-import { requestPush, requestPull, automatePush } from '../syncServices/SyncManager'
+import { requestPull, requestPush } from '../syncServices/SyncManager'
 import type { User, LoginCredentials, RegisterCredentials } from '../types'
 import * as AuthService from '../services/AuthService'
 import * as ProfileService from '../services/ProfileService'
+import { onOpenUrl } from '@tauri-apps/plugin-deep-link'
 
 interface AuthContextValue {
   user: User | null
@@ -34,8 +35,9 @@ const AuthContext = createContext<AuthContextValue>({
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [pulled, setPulled] = useState<boolean>(false);
+  const [pulled, setPulled] = useState<boolean>(false)
   const [token, setToken] = useState<string | null>(() => {
+    // extract token from the url
     const params = new URLSearchParams(window.location.search)
     const oauthToken = params.get('token')
     if (oauthToken) {
@@ -66,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   setPulled(res)
                 }
               })
-              .catch((err) => console.log(err))
+              .catch((err) => console.log(err));
           }
         })
         .catch(() => {
@@ -81,6 +83,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(false)
     }
   }, [token, user, pulled])
+
+useEffect(() => {
+  if (!user) return;
+
+  let timerId: ReturnType<typeof setTimeout>;
+  let isCancelled = false;
+
+  const runPushLoop = async () => {
+    try {
+      await requestPush();
+    } catch (error) {
+      console.error("Auto push failed:", error);
+    } finally {
+      // Schedule the next run 5 seconds after the current one finishes
+      if (!isCancelled) {
+        timerId = setTimeout(runPushLoop, 50000);
+      }
+    }
+  };
+
+  runPushLoop();
+
+  return () => {
+    isCancelled = true;
+    clearTimeout(timerId);
+  };
+}, [user]); // Re-runs ONLY if 'user' state changes
+
+useEffect(() => {
+  let unlisten: () => void
+    const processUrl = async(url:string) => {
+      try{
+        const parsedUrl = new URL(url)
+        if(parsedUrl.host == 'callback' || parsedUrl.pathname.includes('callback')){
+          const token = parsedUrl.searchParams.get('token')
+          if(token){
+            localStorage.setItem('un-token', token)
+            setToken(token)
+          }
+        }
+      }catch(err){
+        console.error("Error: " + err)
+      }
+    }
+
+    const listner = async () => {
+      unlisten = await onOpenUrl((urls) => {
+        if(urls.length > 0){
+          processUrl(urls[0])
+        }
+      })
+    }
+    listner()
+    return () => {
+      if(unlisten) unlisten()
+    }
+},[setToken])
 
   const login = async (creds: LoginCredentials) => {
     const res = await AuthService.login(creds)
@@ -113,7 +172,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = async () => {
-    try { await AuthService.logout() } catch { /* ignore */ }
+    try { 
+      await requestPush()
+      await AuthService.logout()
+     } catch { /* ignore */ }
     localStorage.removeItem('un-token')
     localStorage.removeItem('user_id')
     setToken(null)

@@ -32,7 +32,7 @@ export default function NoteCreatePage() {
   useEffect(() => {
     CollectionService.getCollections()
       .then((res) => {
-        const cols = res.data ?? []
+        const cols:Collection[] = (res.data as Collection[]) ?? []
         setCollections(cols)
         if (collectionId === null) {
           setCurrentCollection({ id: null, name: 'Unsorted' })

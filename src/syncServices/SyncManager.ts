@@ -103,8 +103,8 @@ export const requestPush = async() => {
     }
 }
 
-export const automatePush = async() => {
-    return setInterval(async() => {
-        await requestPush()
-    }, 5000);
-}
+// export const automatePush = async() => {
+//     return setInterval(async() => {
+//         await requestPush()
+//     }, 5000);
+// }

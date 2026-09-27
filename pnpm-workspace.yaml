@@ -1,0 +1,2 @@
+minimumReleaseAgeExclude:
+  - '@tauri-apps/plugin-deep-link@2.5.0'

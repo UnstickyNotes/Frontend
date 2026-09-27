@@ -1,4 +1,5 @@
 use tauri_plugin_sql::{Migration, MigrationKind};
+use tauri_plugin_deep_link;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -32,6 +33,7 @@ pub fn run() {
                 .add_migrations("sqlite:UnstickyNotes.db", migrations)
                 .build(),
       )
+      .plugin(tauri_plugin_deep_link::init())
       .run(tauri::generate_context!())
       .expect("error while running tauri application");
   }

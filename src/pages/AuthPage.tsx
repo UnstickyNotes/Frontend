@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import { useTheme } from '../contexts/ThemeContext'
 import { useAuth } from '../contexts/AuthContext'
 import PasswordInput from '../components/PasswordInput'
+import { openUrl } from '@tauri-apps/plugin-opener'
 
 // import { useOnlineStatus } from '../contexts/OnlineContext' 
 
@@ -79,11 +80,13 @@ function SignInForm() {
 
   // Google OAuth: redirect the browser to the backend. AuthContext will pick
   // up the returned ?token= from the URL when Google redirects back.
-  const handleGoogleAuth = () => {
+  const handleGoogleAuth = async() => {
     setGoogleLoading(true)
-    setTimeout(() => {
-      window.location.href = 'http://localhost:8000/api/OAuth/google/redirect'
-    }, 80)
+    // setTimeout(() => {
+    //   window.location.href = 'http://localhost:8000/api/OAuth/google/redirect'
+    // }, 80)
+    const url = "http://localhost:8000/api/OAuth/google/redirect"
+    await openUrl(url)
   }
   return (
     <form className="auth-form" onSubmit={handleSubmit} noValidate>

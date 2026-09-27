@@ -47,7 +47,7 @@ export default function NoteDetailPage() {
   useEffect(() => {
     CollectionService.getCollections()
       .then((res) => {
-        const cols = res.data ?? []
+        const cols:Collection[] = (res.data as Collection[]) ?? []
         setCollections(cols)
         if (collectionId === '-1') {
           setCurrentCollection({ id: -1, name: 'Unsorted' })

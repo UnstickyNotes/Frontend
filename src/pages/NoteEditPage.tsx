@@ -53,7 +53,7 @@ export default function NoteEditPage() {
   useEffect(() => {
     CollectionService.getCollections()
       .then((res) => {
-        const cols = res.data ?? []
+        const cols:Collection[] = (res.data as Collection[]) ?? []
         setCollections(cols)
         if (collectionId === '-1') {
           setCurrentCollection({ id: -1, name: 'Unsorted' })
@@ -94,7 +94,7 @@ export default function NoteEditPage() {
         title: title.trim() || undefined,
         body: body.trim() || undefined,
         collection_id: selectedCollectionId === -1 ? undefined : selectedCollectionId,
-        collectionId: selectedCollectionId === -1 ? undefined : selectedCollectionId,
+        // collectionId: selectedCollectionId === -1 ? undefined : selectedCollectionId,
       })
       navigate(`/${collectionId}/${noteId}`)
     } catch {

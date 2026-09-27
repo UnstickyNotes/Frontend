@@ -1,4 +1,4 @@
-import { useState, useEffect, type KeyboardEvent } from 'react'
+import { useState, useEffect } from 'react'
 import Modal from './Modal'
 import CollectionDropdown from './CollectionDropdown'
 import type { Collection } from '../types'
@@ -8,9 +8,7 @@ interface NoteModalProps {
   mode: 'create' | 'edit'
   initialTitle?: string
   initialBody?: string
-  /** Pre-select a collection when the modal opens. -1 = Unsorted. */
   initialCollectionId?: number
-  /** Full list of the user's real collections (not including virtual Unsorted). */
   collections?: Collection[]
   onClose: () => void
   onSubmit: (data: { title?: string; body?: string; collectionId?: number }) => Promise<void> | void
