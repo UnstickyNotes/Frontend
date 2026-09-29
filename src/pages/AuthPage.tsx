@@ -82,10 +82,7 @@ function SignInForm() {
   // up the returned ?token= from the URL when Google redirects back.
   const handleGoogleAuth = async() => {
     setGoogleLoading(true)
-    // setTimeout(() => {
-    //   window.location.href = 'http://localhost:8000/api/OAuth/google/redirect'
-    // }, 80)
-    const url = "http://localhost:8000/api/OAuth/google/redirect"
+    const url = "https://unstickynotes-api.onrender.com/api/OAuth/google/redirect"
     await openUrl(url)
   }
   return (
@@ -159,10 +156,7 @@ function SignUpForm() {
   // up the returned ?token= from the URL when Google redirects back.
   const handleGoogleAuth = async() => {
     setGoogleLoading(true)
-    // setTimeout(() => {
-    //   window.location.href = 'http://localhost:8000/api/OAuth/google/redirect'
-    // }, 80)
-    const url = "http://localhost:8000/api/OAuth/google/redirect"
+    const url = "https://unstickynotes-api.onrender.com/api/OAuth/google/redirect"
     await openUrl(url)
   }
 

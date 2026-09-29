@@ -145,8 +145,8 @@ export default function Sidebar({
     ? raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('data:')
       ? raw
       : raw.startsWith('/')
-        ? `http://localhost:8000${raw}`
-        : `http://localhost:8000/${raw}`
+        ? `https://unstickynotes-api.onrender.com${raw}`
+        : `https://unstickynotes-api.onrender.com/${raw}`
     : null
 
   const avatarSrc = customCached || resolvedUrl

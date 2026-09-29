@@ -268,13 +268,12 @@ export default function ProfilePage() {
       return
     }
 
-    // Resolve relative storage path if needed (e.g. /storage/... -> http://localhost:8000/storage/...)
     const resolvedUrl =
       raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('data:')
         ? raw
         : raw.startsWith('/')
-          ? `http://localhost:8000${raw}`
-          : `http://localhost:8000/${raw}`
+          ? `https://unstickynotes-api.onrender.com${raw}`
+          : `https://unstickynotes-api.onrender.com/${raw}`
 
     setAvatarSrc(resolvedUrl)
     setImageError(false)

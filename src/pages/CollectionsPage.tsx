@@ -11,6 +11,7 @@ import * as CollectionService from '../services/CollectionService'
 import * as NoteService from '../services/NoteService'
 import type { Collection, Note } from '../types'
 import { requestPull, requestPush } from '../syncServices/SyncManager'
+import { listen } from "@tauri-apps/api/event"
 
 export default function CollectionsPage() {
   const { collectionId } = useParams()
@@ -73,6 +74,16 @@ export default function CollectionsPage() {
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [collectionId, pulled])
+
+  useEffect(() => {
+    const unlisten = listen<string>('open_modal', (e) => {
+      console.log('triggered by shortcut' + e)
+      setIsNoteModalOpen(true)
+    })
+    return () => {
+      unlisten.then((unlisten) => unlisten())
+    }
+  },[])
 
   const [newCollectionOpen, setNewCollectionOpen] = useState(false)
 

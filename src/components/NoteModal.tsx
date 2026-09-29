@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Modal from './Modal'
 import CollectionDropdown from './CollectionDropdown'
 import type { Collection } from '../types'
+// import { listen } from '@tauri-apps/api/event'
 
 interface NoteModalProps {
   isOpen: boolean
@@ -48,7 +49,7 @@ export default function NoteModal({
     }
   }, [isOpen, initialTitle, initialBody, initialCollectionId])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault()
     const trimmedTitle = title.trim()
     const trimmedBody = body.trim()

@@ -33,7 +33,7 @@ export async function checkOnlineStatus (){
     }
 
     try{
-        const res = await fetch('http://localhost:8000/api/ping', {
+        const res = await fetch('https://unstickynotes-api.onrender.com/api/ping', {
             method:'HEAD',
             cache: 'no-store',
             signal: AbortSignal.timeout(8000),
