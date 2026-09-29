@@ -8,8 +8,8 @@ use tauri::{
   Emitter};
 use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_global_shortcut::{
-  Code,
-  Modifiers,
+  // Code,
+  // Modifiers,
   Shortcut,
   ShortcutState,
   GlobalShortcutExt,
@@ -45,9 +45,16 @@ pub fn run() {
       .plugin(tauri_plugin_opener::init())
       .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
             if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.unminimize();
+                let _ = window.set_always_on_top(true);
                 let _ = window.set_focus();
+                let _ = window.set_always_on_top(false);
+                // when trying to open using shortcuts
+                if args.contains(&"--quick-note".to_string()) {
+                        let _ = window.emit("open_modal", "quick-modal");
+                    }
             }
-
             // 2. Forward the CLI deep-link argument to the JS listener
             // On Linux, the OS passes 'unstickynotes://...' as args[1] to the new process
             if let Some(url) = args.get(1) {
@@ -63,7 +70,7 @@ pub fn run() {
         ))
       .setup(|app| {
         // global shortcut
-          let shortcut_str = "Ctrl+Shift+Alt+A";
+          let shortcut_str = "Ctrl+Shift+Alt+;";
             let shortcut: Shortcut = shortcut_str
                 .parse()
                 .expect("Failed to parse shortcut string");
@@ -83,8 +90,8 @@ pub fn run() {
                                 let _ = window.show();
                                 let _ = window.unminimize();
                                 let _ = window.set_focus();
+                                let _ = window.emit("open_modal", "quick-modal");
                             }
-                            let _ = app.emit("open_modal", "quick-modal");
                         }
                     })
                     .build(),
