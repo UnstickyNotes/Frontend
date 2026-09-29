@@ -11,6 +11,10 @@
     "sql:allow-load",
     "sql:allow-close",
     "deep-link:default",
-    "opener:default"
+    "opener:default",
+    "autostart:default",
+    "global-shortcut:default",
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-is-registered"
   ]
 }
