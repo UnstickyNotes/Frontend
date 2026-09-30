@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import Modal from './Modal'
-import { COLLECTION_COLORS, UNSORTED_COLOR } from '../utils/collectionColors'
+import { COLLECTION_COLORS, UNSORTED_COLOR, getCollectionColor } from '../utils/collectionColors'
 import type { Collection } from '../types'
 
 function XIcon() {
@@ -82,9 +82,17 @@ export default function NoteModal({
 
   // Real collections (no Unsorted in the list — Unsorted is a separate chip)
   const realCollections = collections.filter(c => c.id !== -1 && String(c.id) !== '-1')
+  const accentColor = getCollectionColor(selectedColId, collections)
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} onConfirm={() => handleSubmit()} maxWidth="510px" showAccentBar>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      onConfirm={() => handleSubmit()}
+      maxWidth="510px"
+      showAccentBar
+      accentColor={accentColor}
+    >
       <form onSubmit={handleSubmit} noValidate>
         {/* Header */}
         <div className="modal-header">

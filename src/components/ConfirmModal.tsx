@@ -18,6 +18,7 @@ interface ConfirmModalProps {
   confirmText?:   string
   cancelText?:    string
   isDestructive?: boolean
+  accentColor?:   string
 }
 
 export default function ConfirmModal({
@@ -29,6 +30,7 @@ export default function ConfirmModal({
   confirmText   = 'Confirm',
   cancelText    = 'Cancel',
   isDestructive = false,
+  accentColor,
 }: ConfirmModalProps) {
   const [loading, setLoading] = useState(false)
 
@@ -45,7 +47,14 @@ export default function ConfirmModal({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} onConfirm={handleConfirm} maxWidth="400px">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      onConfirm={handleConfirm}
+      maxWidth="400px"
+      showAccentBar={Boolean(accentColor)}
+      accentColor={accentColor}
+    >
       <div className="modal-header">
         <h3 className="modal-title">{title}</h3>
         <button className="modal-close-btn" type="button" onClick={onClose} aria-label="Close">

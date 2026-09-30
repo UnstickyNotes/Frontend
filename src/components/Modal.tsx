@@ -6,8 +6,10 @@ interface ModalProps {
   onConfirm?:     () => void
   children:       ReactNode
   maxWidth?:      string
-  /** Renders the green accent bar at the very top of the modal */
+  /** Renders the accent bar at the very top of the modal */
   showAccentBar?: boolean
+  /** Collection or custom accent color for the bar, buttons, and focus states */
+  accentColor?:   string
 }
 
 export default function Modal({
@@ -17,6 +19,7 @@ export default function Modal({
   children,
   maxWidth      = '440px',
   showAccentBar = false,
+  accentColor,
 }: ModalProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -51,6 +54,11 @@ export default function Modal({
 
         // If user has focused the Cancel button specifically, let Enter activate Cancel
         if (target?.tagName === 'BUTTON' && target.classList.contains('btn-cancel')) {
+          return
+        }
+
+        // If user has focused a collection chip, let Enter toggle that chip
+        if (target?.tagName === 'BUTTON' && target.classList.contains('collection-chip')) {
           return
         }
 
@@ -96,10 +104,18 @@ export default function Modal({
       <div
         ref={containerRef}
         className="modal-container"
-        style={{ maxWidth }}
+        style={{
+          maxWidth,
+          ...(accentColor ? ({ '--modal-accent': accentColor } as React.CSSProperties) : {}),
+        }}
         onClick={e => e.stopPropagation()}
       >
-        {showAccentBar && <div className="modal-accent-bar" />}
+        {(showAccentBar || Boolean(accentColor)) && (
+          <div
+            className="modal-accent-bar"
+            style={accentColor ? { background: accentColor } : undefined}
+          />
+        )}
         <div className="modal-body">
           {children}
         </div>

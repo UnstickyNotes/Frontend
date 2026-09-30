@@ -9,7 +9,6 @@ import { getCollectionColor, UNSORTED_COLOR } from '../utils/collectionColors'
 import * as CollectionService from '../services/CollectionService'
 import * as NoteService from '../services/NoteService'
 import type { Collection, Note } from '../types'
-import { listen } from '@tauri-apps/api/event'
 
 function SearchIcon() {
   return (
@@ -76,13 +75,14 @@ export default function CollectionsPage() {
       .finally(() => setLoading(false))
   }, [collectionId, pulled])
 
-  // Listen for keyboard shortcut to open modal
+  // Listen for notes-updated event from QuickNoteModal
   useEffect(() => {
-    const unlisten = listen<string>('open_modal', () => {
-      setEditingNote(null)
-      setIsNoteModalOpen(true)
-    })
-    return () => { unlisten.then(fn => fn()) }
+    const onNotesUpdated = async () => {
+      const allRes = await NoteService.getAllNotes()
+      setAllNotes((allRes as { data?: Note[] }).data ?? [])
+    }
+    window.addEventListener('notes-updated', onNotesUpdated)
+    return () => window.removeEventListener('notes-updated', onNotesUpdated)
   }, [])
 
   // Compute displayed notes based on active collection + search
@@ -302,6 +302,7 @@ export default function CollectionsPage() {
         message={`Delete "${deletingNote?.title}"? This cannot be undone.`}
         confirmText="Delete"
         isDestructive
+        accentColor={getCollectionColor(deletingNote?.collection_id ?? deletingNote?.collectionId, collections)}
       />
 
       {/* Help button */}

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router'
 import AppLayout from '../components/AppLayout'
 import ConfirmModal from '../components/ConfirmModal'
 import { useAuth } from '../contexts/AuthContext'
-import { COLLECTION_COLORS, UNSORTED_COLOR } from '../utils/collectionColors'
+import { COLLECTION_COLORS, UNSORTED_COLOR, getCollectionColor } from '../utils/collectionColors'
 import * as CollectionService from '../services/CollectionService'
 import * as NoteService from '../services/NoteService'
 import type { Collection, Note } from '../types'
@@ -179,6 +179,7 @@ export default function NoteEditPage() {
         message={`Delete "${originalNote?.title}"? This cannot be undone.`}
         confirmText="Delete"
         isDestructive
+        accentColor={getCollectionColor(selectedColId, collections)}
       />
     </AppLayout>
   )

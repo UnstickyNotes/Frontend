@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import Modal from './Modal'
+import type { Collection } from '../types'
+import { getCollectionColorByIndex } from '../utils/collectionColors'
 
 function XIcon() {
   return (
@@ -10,12 +12,18 @@ function XIcon() {
 }
 
 interface NewCollectionModalProps {
-  isOpen:    boolean
-  onClose:   () => void
-  onSubmit:  (name: string) => Promise<void> | void
+  isOpen:       boolean
+  collections?: Collection[]
+  onClose:      () => void
+  onSubmit:     (name: string) => Promise<void> | void
 }
 
-export default function NewCollectionModal({ isOpen, onClose, onSubmit }: NewCollectionModalProps) {
+export default function NewCollectionModal({
+  isOpen,
+  collections = [],
+  onClose,
+  onSubmit,
+}: NewCollectionModalProps) {
   const [name, setName]       = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState('')
@@ -40,8 +48,18 @@ export default function NewCollectionModal({ isOpen, onClose, onSubmit }: NewCol
     }
   }
 
+  const realCols = collections.filter(c => c.id !== -1 && String(c.id) !== '-1')
+  const accentColor = getCollectionColorByIndex(realCols.length)
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} onConfirm={() => handleSubmit()} maxWidth="420px" showAccentBar>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      onConfirm={() => handleSubmit()}
+      maxWidth="420px"
+      showAccentBar
+      accentColor={accentColor}
+    >
       <form onSubmit={handleSubmit} noValidate>
         <div className="modal-header">
           <h3 className="modal-title">New Collection</h3>

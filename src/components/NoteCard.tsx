@@ -45,23 +45,41 @@ export default function NoteCard({
 }: NoteCardProps) {
   const dateStr = formatDate(note.created_at)
 
+  const handleCardClick = () => {
+    if (document.querySelector('.modal-overlay')) return
+    onClick?.()
+  }
+
   const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault()
     e.stopPropagation()
+    ;(e.currentTarget as HTMLElement)?.blur?.()
     onEdit?.(note)
   }
 
   const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault()
     e.stopPropagation()
+    ;(e.currentTarget as HTMLElement)?.blur?.()
     onDelete?.(note)
   }
 
   return (
     <div
       className="note-card"
-      onClick={onClick}
+      onClick={handleCardClick}
       role="button"
       tabIndex={0}
-      onKeyDown={e => e.key === 'Enter' && onClick?.()}
+      onKeyDown={e => {
+        if (e.key === 'Enter') {
+          if (e.target !== e.currentTarget || document.querySelector('.modal-overlay')) {
+            return
+          }
+          e.preventDefault()
+          e.stopPropagation()
+          onClick?.()
+        }
+      }}
       aria-label={`Note: ${note.title}`}
     >
       {/* Colored accent bar */}

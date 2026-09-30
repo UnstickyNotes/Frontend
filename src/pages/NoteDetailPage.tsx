@@ -132,6 +132,7 @@ export default function NoteDetailPage() {
         message={`Delete "${note?.title}"? This cannot be undone.`}
         confirmText="Delete"
         isDestructive
+        accentColor={collectionColor}
       />
     </AppLayout>
   )

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import Modal from './Modal'
+import type { Collection } from '../types'
+import { getCollectionColor } from '../utils/collectionColors'
 
 function XIcon() {
   return (
@@ -12,6 +14,8 @@ function XIcon() {
 interface EditCollectionModalProps {
   isOpen:        boolean
   initialName?:  string
+  collectionId?: string | number | null
+  collections?:  Collection[]
   onClose:       () => void
   onSubmit:      (newName: string) => Promise<void> | void
 }
@@ -19,6 +23,8 @@ interface EditCollectionModalProps {
 export default function EditCollectionModal({
   isOpen,
   initialName = '',
+  collectionId,
+  collections = [],
   onClose,
   onSubmit,
 }: EditCollectionModalProps) {
@@ -47,8 +53,17 @@ export default function EditCollectionModal({
     }
   }
 
+  const accentColor = getCollectionColor(collectionId, collections)
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} onConfirm={() => handleSubmit()} maxWidth="420px" showAccentBar>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      onConfirm={() => handleSubmit()}
+      maxWidth="420px"
+      showAccentBar
+      accentColor={accentColor}
+    >
       <form onSubmit={handleSubmit} noValidate>
         <div className="modal-header">
           <h3 className="modal-title">Rename Collection</h3>

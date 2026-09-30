@@ -1016,8 +1016,9 @@ input:-webkit-autofill:active {
 }
 .modal-accent-bar {
   height: 3px;
-  background: linear-gradient(90deg, var(--green), var(--green-hover));
+  background: var(--modal-accent, linear-gradient(90deg, var(--green), var(--green-hover)));
   flex-shrink: 0;
+  transition: background 0.25s ease;
 }
 .modal-body { padding: 1.375rem; }
 .modal-header {
@@ -1132,6 +1133,24 @@ input:-webkit-autofill:active {
 .btn-save:hover { background-color: var(--green-hover); }
 .btn-save:active { transform: scale(0.97); }
 .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.modal-container .btn-save {
+  background-color: var(--modal-accent, var(--green));
+  color: #ffffff;
+  transition: background-color 0.2s ease, filter 0.15s ease, transform 0.1s ease;
+}
+.modal-container .btn-save:hover:not(:disabled) {
+  background-color: var(--modal-accent, var(--green));
+  filter: brightness(1.1);
+}
+.modal-container .btn-save:active:not(:disabled) {
+  transform: scale(0.97);
+  filter: brightness(0.95);
+}
+.modal-container .modal-input:focus {
+  border-color: var(--modal-accent, var(--green));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--modal-accent, var(--green)) 18%, transparent);
+}
 
 .btn-cancel {
   display: inline-flex;

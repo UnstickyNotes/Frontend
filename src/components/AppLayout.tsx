@@ -1,35 +1,41 @@
 import { useState, useEffect, useRef, type ReactNode } from 'react'
 import { useNavigate } from 'react-router'
+import { listen } from '@tauri-apps/api/event'
 import Sidebar from './Sidebar'
 import NewCollectionModal from './NewCollectionModal'
 import EditCollectionModal from './EditCollectionModal'
 import ConfirmModal from './ConfirmModal'
+import QuickNoteModal from './QuickNoteModal'
 import { type Collection } from '../types'
+import { getCollectionColor } from '../utils/collectionColors'
 import * as CollectionService from '../services/CollectionService'
+import * as NoteService from '../services/NoteService'
 
-function MenuIcon() {
+function ShowSidebarIcon() {
   return (
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth={2} />
+      <path d="M9 3v18" strokeWidth={2} />
+      <path d="M13 9l3 3-3 3" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
     </svg>
   )
 }
 
 interface AppLayoutProps {
-  children:             ReactNode
-  collections:          Collection[]
-  noteCounts?:          Record<string, number>
-  totalNoteCount?:      number
-  userName?:            string
+  children: ReactNode
+  collections: Collection[]
+  noteCounts?: Record<string, number>
+  totalNoteCount?: number
+  userName?: string
   /** Called when sidebar "+ New Note" is clicked — caller opens the modal */
-  onNewNote?:           () => void
+  onNewNote?: () => void
   onCollectionCreated?: (collection: Collection) => void
   onCollectionUpdated?: (collection: Collection) => void
   onCollectionDeleted?: (collectionId: string | number | null) => void
   /** Topbar left slot — e.g. back button + title, or breadcrumb */
-  topbarLeft?:          ReactNode
+  topbarLeft?: ReactNode
   /** Topbar right slot — e.g. search + new-note button */
-  topbarRight?:         ReactNode
+  topbarRight?: ReactNode
 }
 
 const MIN_WIDTH = 200
@@ -40,8 +46,8 @@ const SPEED_RATIO = 0.85
 export default function AppLayout({
   children,
   collections,
-  noteCounts       = {},
-  totalNoteCount   = 0,
+  noteCounts = {},
+  totalNoteCount = 0,
   userName,
   onNewNote,
   onCollectionCreated,
@@ -51,9 +57,9 @@ export default function AppLayout({
   topbarRight,
 }: AppLayoutProps) {
   const navigate = useNavigate()
-  const [newColOpen, setNewColOpen]           = useState(false)
-  const [editingCol, setEditingCol]           = useState<Collection | null>(null)
-  const [deletingCol, setDeletingCol]         = useState<Collection | null>(null)
+  const [newColOpen, setNewColOpen] = useState(false)
+  const [editingCol, setEditingCol] = useState<Collection | null>(null)
+  const [deletingCol, setDeletingCol] = useState<Collection | null>(null)
   const [currentCollections, setCurrentCollections] = useState<Collection[]>(collections)
 
   const [sidebarWidth, setSidebarWidth] = useState(() => {
@@ -67,7 +73,29 @@ export default function AppLayout({
   const startXRef = useRef(0)
   const startWidthRef = useRef(0)
 
+  const [quickNoteOpen, setQuickNoteOpen] = useState(false)
+
   useEffect(() => { setCurrentCollections(collections) }, [collections])
+
+  // Listen for global shortcut ("Ctrl+Shift+Alt+;") emitted from Tauri lib.rs
+  useEffect(() => {
+    const unlistenPromise = listen<string>('open_modal', () => {
+      setQuickNoteOpen(true)
+    })
+    return () => {
+      unlistenPromise.then(fn => fn()).catch(() => { })
+    }
+  }, [])
+
+  const handleQuickNoteSubmit = async (body: string, collectionId?: number) => {
+    const title = 'Untitled Quick Note'
+    await NoteService.addNote({
+      title,
+      body,
+      collection_id: collectionId,
+    })
+    window.dispatchEvent(new CustomEvent('notes-updated'))
+  }
 
   useEffect(() => {
     let lastWidth = window.innerWidth
@@ -99,7 +127,7 @@ export default function AppLayout({
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDraggingRef.current) return
-      
+
       const deltaX = (e.clientX - startXRef.current) * SPEED_RATIO
       const targetWidth = Math.round(startWidthRef.current + deltaX)
 
@@ -157,7 +185,7 @@ export default function AppLayout({
   }, [isDragging])
 
   const handleCreateCollection = async (name: string) => {
-    const res     = await CollectionService.addCollection({ name })
+    const res = await CollectionService.addCollection({ name })
     const created = (res as { data?: Collection }).data
     if (created) {
       setCurrentCollections(prev => [...prev, created])
@@ -168,7 +196,7 @@ export default function AppLayout({
 
   const handleUpdateCollection = async (newName: string) => {
     if (!editingCol) return
-    const res     = await CollectionService.updateCollection({ name: newName }, String(editingCol.id))
+    const res = await CollectionService.updateCollection({ name: newName }, String(editingCol.id))
     const updated = (res as { data?: Collection }).data ?? { ...editingCol, name: newName }
     setCurrentCollections(prev => prev.map(c => (c.id === updated.id ? updated : c)))
     onCollectionUpdated?.(updated)
@@ -189,12 +217,12 @@ export default function AppLayout({
   }
 
   return (
-    <div 
+    <div
       className={`app-layout ${!isSidebarOpen ? 'sidebar-closed' : ''}`}
       style={{ '--sidebar-width': `${isSidebarOpen ? sidebarWidth : 0}px` } as React.CSSProperties}
     >
-      <div 
-        className={`sidebar-container ${isSidebarOpen ? 'open' : 'closed'} ${isDragging ? 'resizing' : ''} ${isResisting ? 'resisting-min' : ''}`} 
+      <div
+        className={`sidebar-container ${isSidebarOpen ? 'open' : 'closed'} ${isDragging ? 'resizing' : ''} ${isResisting ? 'resisting-min' : ''}`}
         style={{ width: isSidebarOpen ? sidebarWidth : 0 }}
       >
         <Sidebar
@@ -219,12 +247,13 @@ export default function AppLayout({
         <div className="main-topbar">
           <div className="main-topbar-left">
             {!isSidebarOpen && (
-              <button 
-                className="icon-btn sidebar-toggle-btn" 
+              <button
+                className="icon-btn sidebar-toggle-btn"
                 onClick={() => setIsSidebarOpen(true)}
                 aria-label="Open sidebar"
+                title="Open sidebar"
               >
-                <MenuIcon />
+                <ShowSidebarIcon />
               </button>
             )}
             {topbarLeft}
@@ -236,12 +265,15 @@ export default function AppLayout({
 
       <NewCollectionModal
         isOpen={newColOpen}
+        collections={currentCollections}
         onClose={() => setNewColOpen(false)}
         onSubmit={handleCreateCollection}
       />
       <EditCollectionModal
         isOpen={Boolean(editingCol)}
         initialName={editingCol?.name}
+        collectionId={editingCol?.id}
+        collections={currentCollections}
         onClose={() => setEditingCol(null)}
         onSubmit={handleUpdateCollection}
       />
@@ -253,6 +285,13 @@ export default function AppLayout({
         message={`Delete "${deletingCol?.name}"? Notes inside will become unsorted.`}
         confirmText="Delete"
         isDestructive
+        accentColor={getCollectionColor(deletingCol?.id, currentCollections)}
+      />
+      <QuickNoteModal
+        isOpen={quickNoteOpen}
+        onClose={() => setQuickNoteOpen(false)}
+        onSubmit={handleQuickNoteSubmit}
+        collections={currentCollections}
       />
     </div>
   )
