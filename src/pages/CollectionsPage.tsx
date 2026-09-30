@@ -1,192 +1,176 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import AppLayout from '../components/AppLayout'
 import NoteCard from '../components/NoteCard'
-import NewCardPlaceholder from '../components/NewCardPlaceholder'
-import NewCollectionModal from '../components/NewCollectionModal'
 import NoteModal from '../components/NoteModal'
 import ConfirmModal from '../components/ConfirmModal'
 import { useAuth } from '../contexts/AuthContext'
+import { getCollectionColor, UNSORTED_COLOR } from '../utils/collectionColors'
 import * as CollectionService from '../services/CollectionService'
 import * as NoteService from '../services/NoteService'
 import type { Collection, Note } from '../types'
-import { requestPull, requestPush } from '../syncServices/SyncManager'
-import { listen } from "@tauri-apps/api/event"
+import { listen } from '@tauri-apps/api/event'
+
+function SearchIcon() {
+  return (
+    <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="11" cy="11" r="8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="m21 21-4.35-4.35" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function PlusIcon() {
+  return (
+    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
 
 export default function CollectionsPage() {
-  const { collectionId } = useParams()
-  const navigate = useNavigate()
-  const { user,pulled } = useAuth()
+  const { collectionId }   = useParams()
+  const navigate           = useNavigate()
+  const { user, pulled }   = useAuth()
 
-  const [collections, setCollections] = useState<Collection[]>([])
-  const [notes, setNotes] = useState<Note[]>([])
+  const [collections, setCollections]     = useState<Collection[]>([])
+  const [allNotes, setAllNotes]           = useState<Note[]>([])
   const [currentCollection, setCurrentCollection] = useState<Collection | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading]             = useState(true)
+  const [searchQuery, setSearchQuery]     = useState('')
 
-  // Card modal state
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
-  const [editingNote, setEditingNote] = useState<Note | null>(null)
-  const [deletingNote, setDeletingNote] = useState<Note | null>(null)
+  const [editingNote, setEditingNote]     = useState<Note | null>(null)
+  const [deletingNote, setDeletingNote]   = useState<Note | null>(null)
 
   const userName = [user?.first_name, user?.last_name].filter(Boolean).join(' ')
-  const userHandle = user?.email?.split('@')[0] ?? ''
 
-  // Load collections on mount or when collectionId changes
+  const isAllNotes = collectionId === 'all' || !collectionId
+
+  // Load collections
   useEffect(() => {
     CollectionService.getCollections()
-      .then((res) => {
+      .then(res => {
         const cols: Collection[] = (res as { data?: Collection[] }).data ?? []
         setCollections(cols)
-        if (collectionId) {
-          if (collectionId == '-1') {
-            setCurrentCollection({ id: -1, name: 'Unsorted' })
-          } else {
-            const found = cols.find(c => String(c.id) === collectionId) ?? null
-            setCurrentCollection(found)
-          }
+        if (isAllNotes) {
+          setCurrentCollection(null)
+        } else if (collectionId === '-1') {
+          setCurrentCollection({ id: -1, name: 'Unsorted' })
         } else {
-          // Default to Unsorted collection (id: -1)
-          navigate('/-1', { replace: true })
+          setCurrentCollection(cols.find(c => String(c.id) === collectionId) ?? null)
         }
       })
       .catch(console.error)
-  }, [collectionId, navigate, pulled])
+  }, [collectionId, pulled])
 
-  // Load notes for the active collection
+  // Load ALL notes (for counts + display)
   useEffect(() => {
     setLoading(true)
     NoteService.getAllNotes()
-      .then((res) => {
-        const allNotes: Note[] = (res as { data?: Note[] }).data ?? []
-        if (collectionId) {
-          const filtered = allNotes.filter(n => {
-            const cId = n.collection_id
-            if (collectionId === '-1') {
-              return cId === -1 || cId === null || cId === undefined
-            }
-            return cId != null && String(cId) === collectionId
-          })
-          setNotes(filtered)
-        } else {
-          setNotes(allNotes)
-        }
+      .then(res => {
+        const notes: Note[] = (res as { data?: Note[] }).data ?? []
+        setAllNotes(notes)
       })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [collectionId, pulled])
 
+  // Listen for keyboard shortcut to open modal
   useEffect(() => {
-    const unlisten = listen<string>('open_modal', (e) => {
-      console.log('triggered by shortcut' + e)
+    const unlisten = listen<string>('open_modal', () => {
+      setEditingNote(null)
       setIsNoteModalOpen(true)
     })
-    return () => {
-      unlisten.then((unlisten) => unlisten())
-    }
-  },[])
+    return () => { unlisten.then(fn => fn()) }
+  }, [])
 
-  const [newCollectionOpen, setNewCollectionOpen] = useState(false)
-
-  const handleCreateCollection = async (name: string) => {
-    const res = await CollectionService.addCollection({ name })
-    const created = (res as { data?: Collection }).data
-    if (created) {
-      setCollections(prev => [...prev, created])
-      navigate(`/${created.id}`)
+  // Compute displayed notes based on active collection + search
+  const displayedNotes = useMemo(() => {
+    let filtered: Note[]
+    if (isAllNotes) {
+      filtered = allNotes
+    } else if (collectionId === '-1') {
+      filtered = allNotes.filter(n => {
+        const cId = n.collection_id ?? n.collectionId
+        return cId === -1 || cId === null || cId === undefined
+      })
+    } else {
+      filtered = allNotes.filter(n => {
+        const cId = n.collection_id ?? n.collectionId
+        return cId != null && String(cId) === collectionId
+      })
     }
-  }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase()
+      filtered = filtered.filter(n =>
+        n.title?.toLowerCase().includes(q) || n.body?.toLowerCase().includes(q)
+      )
+    }
+    return filtered
+  }, [allNotes, collectionId, isAllNotes, searchQuery])
+
+  // Compute per-collection note counts for sidebar badges
+  const noteCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    allNotes.forEach(n => {
+      const cId = n.collection_id ?? n.collectionId
+      const key = cId === null || cId === undefined || cId === -1 ? '-1' : String(cId)
+      counts[key] = (counts[key] ?? 0) + 1
+    })
+    return counts
+  }, [allNotes])
+
+  // ── CRUD handlers ──────────────────────────────────────────────
 
   const handleCollectionUpdated = (updated: Collection) => {
     setCollections(prev => prev.map(c => (c.id === updated.id ? updated : c)))
-    if (String(currentCollection?.id) === String(updated.id)) {
-      setCurrentCollection(updated)
-    }
+    if (String(currentCollection?.id) === String(updated.id)) setCurrentCollection(updated)
   }
 
   const handleCollectionDeleted = (id: string | number | null) => {
     setCollections(prev => prev.filter(c => c.id !== id))
-    if (String(currentCollection?.id) === String(id)) {
-      setCurrentCollection({ id: -1, name: 'Unsorted' })
-    }
+    if (String(currentCollection?.id) === String(id)) setCurrentCollection(null)
   }
 
-  const handleNewCard = () => {
+  const handleNewNote = () => {
     setEditingNote(null)
     setIsNoteModalOpen(true)
   }
 
-  const handleEditNote = (note: Note) => {
-    setEditingNote(note)
-    setIsNoteModalOpen(true)
-  }
-
-  const handleDeleteNote = (note: Note) => {
-    setDeletingNote(note)
-  }
+  const handleEditNote  = (note: Note) => { setEditingNote(note); setIsNoteModalOpen(true) }
+  const handleDeleteNote = (note: Note) => setDeletingNote(note)
 
   const handleNoteSubmit = async (data: { title?: string; body?: string; collectionId?: number }) => {
     if (editingNote) {
-      // Determine collection for update: prefer modal selection, fall back to note's existing collection
       const newColId = data.collectionId ?? editingNote.collection_id ?? editingNote.collectionId
       const res = await NoteService.updateNote(editingNote.id, {
-        title: data.title || undefined,
-        body: data.body || undefined,
+        title:         data.title || undefined,
+        body:          data.body  || undefined,
         collection_id: newColId === -1 ? undefined : newColId,
-        // collectionId: newColId === -1 ? undefined : newColId,
       })
       const updated = (res as { data?: Note }).data ?? {
         ...editingNote,
         title: data.title || editingNote.title || 'Untitled',
-        body: data.body,
+        body:  data.body,
         collection_id: newColId === -1 ? undefined : newColId,
       }
-      // If the note was moved to a different collection, remove it from current view
-      const currentViewColId = collectionId === '-1' ? -1 : Number(collectionId)
-      const updatedColId = updated.collection_id ?? updated.collectionId ?? -1
-      if (data.collectionId !== undefined && updatedColId !== currentViewColId) {
-        setNotes(prev => prev.filter(n => n.id !== updated.id))
-      } else {
-        setNotes(prev => prev.map(n => (n.id === updated.id ? updated : n)))
-      }
+      setAllNotes(prev => prev.map(n => (n.id === updated.id ? updated : n)))
     } else {
-      // For create: use the collection chosen in the modal, fall back to the current URL collection
-      const targetColId = data.collectionId ?? (collectionId ? Number(collectionId) : -1)
+      const targetColId = data.collectionId ?? (collectionId && collectionId !== 'all' ? Number(collectionId) : -1)
       const res = await NoteService.addNote({
-        title: data.title || undefined,
-        body: data.body || undefined,
-        // collectionId: targetColId,
+        title:         data.title || undefined,
+        body:          data.body  || undefined,
         collection_id: targetColId === -1 ? undefined : targetColId,
       })
       const created = (res as { data?: Note }).data
-      // Only add to the current view if the note belongs to the current collection
-      const currentViewColId = collectionId === '-1' ? -1 : Number(collectionId)
-      if (created && (created.title || created.id) && targetColId === currentViewColId) {
-        setNotes(prev => [
-          ...prev,
-          {
-            id: created.id,
-            title: created.title || data.title || 'Untitled',
-            body: created.body ?? data.body,
-            collection_id: created.collection_id ?? targetColId,
-          },
-        ])
+      if (created) {
+        setAllNotes(prev => [...prev, created])
       } else {
-        // Fallback refresh (covers cross-collection creates)
+        // Refresh as fallback
         const allRes = await NoteService.getAllNotes()
-        const allNotes: Note[] = (allRes as { data?: Note[] }).data ?? []
-        if (collectionId) {
-          setNotes(
-            allNotes.filter(n => {
-              const cId = n.collection_id ?? n.collectionId
-              if (collectionId === '-1') {
-                return cId === -1 || cId === null || cId === undefined
-              }
-              return cId != null && String(cId) === collectionId
-            })
-          )
-        } else {
-          setNotes(allNotes)
-        }
+        setAllNotes((allRes as { data?: Note[] }).data ?? [])
       }
     }
   }
@@ -194,54 +178,107 @@ export default function CollectionsPage() {
   const handleDeleteConfirm = async () => {
     if (!deletingNote) return
     await NoteService.deleteNote(deletingNote.id)
-    setNotes(prev => prev.filter(n => n.id !== deletingNote.id))
+    setAllNotes(prev => prev.filter(n => n.id !== deletingNote.id))
     setDeletingNote(null)
   }
 
-  const title = currentCollection?.name ?? (collectionId === '-1' ? 'Unsorted' : 'All Notes')
-  const noteCount = notes.length
+  // ── Topbar composition ─────────────────────────────────────────
+
+  const pageTitle = isAllNotes
+    ? 'All Notes'
+    : (currentCollection?.name ?? (collectionId === '-1' ? 'Unsorted' : 'Notes'))
+
+  const realCollections = collections.filter(c => c.id !== -1 && String(c.id) !== '-1')
+
+  const topbarLeft = <span className="topbar-title">{pageTitle}</span>
+
+  const topbarRight = (
+    <>
+      <div className="topbar-search">
+        <span className="topbar-search-icon"><SearchIcon /></span>
+        <input
+          type="text"
+          placeholder="Search notes..."
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          aria-label="Search notes"
+        />
+      </div>
+      <button
+        id="topbar-new-note-btn"
+        className="topbar-new-note-btn"
+        onClick={handleNewNote}
+        type="button"
+      >
+        <PlusIcon /><span>New Note</span>
+      </button>
+    </>
+  )
 
   return (
     <AppLayout
       collections={collections}
+      noteCounts={noteCounts}
+      totalNoteCount={allNotes.length}
       userName={userName}
-      userHandle={userHandle}
-      onNewCollection={() => setNewCollectionOpen(true)}
+      onNewNote={handleNewNote}
       onCollectionCreated={col => setCollections(prev => [...prev, col])}
       onCollectionUpdated={handleCollectionUpdated}
       onCollectionDeleted={handleCollectionDeleted}
-      topbarLeft={
-        <span className="breadcrumb-current">{title}</span>
-      }
+      topbarLeft={topbarLeft}
+      topbarRight={topbarRight}
     >
       <div className="main-scroll">
-        <h1 className="collections-title">{title}</h1>
-        <button onClick={requestPush}>push</button>
-        <button onClick={requestPull}>pull</button>
-        <p className="collections-count">
-          {loading ? 'Loading…' : noteCount === 0 ? 'No cards yet' : `${noteCount} card${noteCount !== 1 ? 's' : ''}`}
-        </p>
-
-        <div className="card-grid">
-          {notes.map(note => (
-            <NoteCard
-              key={note.id}
-              note={note}
-              onClick={() => navigate(`/${collectionId || '-1'}/${note.id}`)}
-              onEdit={handleEditNote}
-              onDelete={handleDeleteNote}
-            />
-          ))}
-          <NewCardPlaceholder onClick={handleNewCard} />
+        {/* Page header */}
+        <div className="collections-header">
+          <h1 className="collections-title">{pageTitle}</h1>
+          <span className="collections-count">
+            {loading ? '' : `${displayedNotes.length} note${displayedNotes.length !== 1 ? 's' : ''}`}
+          </span>
         </div>
+
+        {/* Masonry grid */}
+        {loading ? (
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Loading…</p>
+        ) : displayedNotes.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon">📝</div>
+            <p className="empty-state-title">
+              {searchQuery ? 'No notes match your search' : 'No notes here yet'}
+            </p>
+            <p className="empty-state-sub">
+              {searchQuery ? 'Try a different keyword' : 'Click "+ New Note" to create one'}
+            </p>
+          </div>
+        ) : (
+          <div className="notes-masonry">
+            {displayedNotes.map(note => {
+              const colId    = note.collection_id ?? note.collectionId
+              const col      = colId !== null && colId !== undefined && colId !== -1
+                ? realCollections.find(c => String(c.id) === String(colId))
+                : null
+              const colName  = col?.name ?? 'Unsorted'
+              const colColor = col
+                ? getCollectionColor(col.id, realCollections)
+                : UNSORTED_COLOR
+
+              return (
+                <NoteCard
+                  key={String(note.id)}
+                  note={note}
+                  collectionName={colName}
+                  collectionColor={colColor}
+                  onClick={() => navigate(`/${collectionId || 'all'}/${note.id}`)}
+                  onEdit={handleEditNote}
+                  onDelete={handleDeleteNote}
+                />
+              )
+            })}
+          </div>
+        )}
       </div>
 
-      <NewCollectionModal
-        isOpen={newCollectionOpen}
-        onClose={() => setNewCollectionOpen(false)}
-        onSubmit={handleCreateCollection}
-      />
-
+      {/* Modals */}
       <NoteModal
         isOpen={isNoteModalOpen}
         mode={editingNote ? 'edit' : 'create'}
@@ -250,13 +287,10 @@ export default function CollectionsPage() {
         initialCollectionId={
           editingNote
             ? (editingNote.collection_id ?? editingNote.collectionId ?? -1)
-            : (collectionId ? Number(collectionId) : -1)
+            : (collectionId && collectionId !== 'all' ? Number(collectionId) : -1)
         }
         collections={collections}
-        onClose={() => {
-          setIsNoteModalOpen(false)
-          setEditingNote(null)
-        }}
+        onClose={() => { setIsNoteModalOpen(false); setEditingNote(null) }}
         onSubmit={handleNoteSubmit}
       />
 
@@ -264,11 +298,14 @@ export default function CollectionsPage() {
         isOpen={Boolean(deletingNote)}
         onClose={() => setDeletingNote(null)}
         onConfirm={handleDeleteConfirm}
-        title="Delete Card"
-        message={`Are you sure you want to delete "${deletingNote?.title}"? This cannot be undone.`}
-        confirmText="Delete Card"
+        title="Delete Note"
+        message={`Delete "${deletingNote?.title}"? This cannot be undone.`}
+        confirmText="Delete"
         isDestructive
       />
+
+      {/* Help button */}
+      <button className="help-btn" type="button" title="Help" aria-label="Help">?</button>
     </AppLayout>
   )
 }

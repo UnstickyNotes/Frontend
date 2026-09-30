@@ -1,168 +1,257 @@
-import { useState, useEffect, type ReactNode } from 'react'
+import { useState, useEffect, useRef, type ReactNode } from 'react'
 import { useNavigate } from 'react-router'
 import Sidebar from './Sidebar'
 import NewCollectionModal from './NewCollectionModal'
 import EditCollectionModal from './EditCollectionModal'
 import ConfirmModal from './ConfirmModal'
 import { type Collection } from '../types'
-import { useTheme } from '../contexts/ThemeContext'
 import * as CollectionService from '../services/CollectionService'
 
-function MoonIcon() {
+function MenuIcon() {
   return (
-    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
-function SunIcon() {
-  return (
-    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
 
 interface AppLayoutProps {
-  children: ReactNode
-  collections: Collection[]
-  userName?: string
-  userHandle?: string
-  onNewCollection?: () => void
+  children:             ReactNode
+  collections:          Collection[]
+  noteCounts?:          Record<string, number>
+  totalNoteCount?:      number
+  userName?:            string
+  /** Called when sidebar "+ New Note" is clicked — caller opens the modal */
+  onNewNote?:           () => void
   onCollectionCreated?: (collection: Collection) => void
   onCollectionUpdated?: (collection: Collection) => void
   onCollectionDeleted?: (collectionId: string | number | null) => void
-  /** Extra controls to render in the topbar right slot (e.g. icon buttons) */
-  topbarLeft?: ReactNode
-  topbarRight?: ReactNode
+  /** Topbar left slot — e.g. back button + title, or breadcrumb */
+  topbarLeft?:          ReactNode
+  /** Topbar right slot — e.g. search + new-note button */
+  topbarRight?:         ReactNode
 }
+
+const MIN_WIDTH = 200
+const MAX_WIDTH = 600
+const COLLAPSE_THRESHOLD = 90
+const SPEED_RATIO = 0.85
 
 export default function AppLayout({
   children,
   collections,
+  noteCounts       = {},
+  totalNoteCount   = 0,
   userName,
-  userHandle,
-  onNewCollection,
+  onNewNote,
   onCollectionCreated,
   onCollectionUpdated,
   onCollectionDeleted,
   topbarLeft,
   topbarRight,
 }: AppLayoutProps) {
-  const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editingCollection, setEditingCollection] = useState<Collection | null>(null)
-  const [deletingCollection, setDeletingCollection] = useState<Collection | null>(null)
-
+  const [newColOpen, setNewColOpen]           = useState(false)
+  const [editingCol, setEditingCol]           = useState<Collection | null>(null)
+  const [deletingCol, setDeletingCol]         = useState<Collection | null>(null)
   const [currentCollections, setCurrentCollections] = useState<Collection[]>(collections)
 
-  useEffect(() => {
-    setCurrentCollections(collections)
-  }, [collections])
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const saved = parseInt(localStorage.getItem('sidebarWidth') || '260', 10)
+    return isNaN(saved) ? 260 : Math.min(Math.max(saved, MIN_WIDTH), MAX_WIDTH)
+  })
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768)
+  const [isDragging, setIsDragging] = useState(false)
+  const [isResisting, setIsResisting] = useState(false)
+  const isDraggingRef = useRef(false)
+  const startXRef = useRef(0)
+  const startWidthRef = useRef(0)
 
-  const handleOpenNewCollection = () => {
-    if (onNewCollection) {
-      onNewCollection()
-    } else {
-      setModalOpen(true)
+  useEffect(() => { setCurrentCollections(collections) }, [collections])
+
+  useEffect(() => {
+    let lastWidth = window.innerWidth
+    const handleResize = () => {
+      const currentWidth = window.innerWidth
+      if (lastWidth > 768 && currentWidth <= 768) {
+        setIsSidebarOpen(false)
+      } else if (lastWidth <= 768 && currentWidth > 768) {
+        setIsSidebarOpen(true)
+      }
+      lastWidth = currentWidth
     }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
+    startXRef.current = e.clientX
+    startWidthRef.current = sidebarWidth
+    isDraggingRef.current = true
+    setIsDragging(true)
   }
 
+  useEffect(() => {
+    if (!isDragging) return
+
+    document.body.classList.add('resizing-sidebar')
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current) return
+      
+      const deltaX = (e.clientX - startXRef.current) * SPEED_RATIO
+      const targetWidth = Math.round(startWidthRef.current + deltaX)
+
+      if (targetWidth < COLLAPSE_THRESHOLD) {
+        // User deliberately pulled far past the minimum width: snap closed
+        setIsSidebarOpen(false)
+        setIsResisting(false)
+      } else if (targetWidth < MIN_WIDTH) {
+        // Resistance / elastic tension zone: sidebar fights the mouse!
+        setIsSidebarOpen(true)
+        setIsResisting(true)
+        const overshoot = MIN_WIDTH - targetWidth
+        const resistedWidth = Math.round(MIN_WIDTH - overshoot * 0.15)
+        setSidebarWidth(resistedWidth)
+      } else if (targetWidth > MAX_WIDTH) {
+        // Resistance at max width
+        setIsSidebarOpen(true)
+        setIsResisting(false)
+        const overshoot = targetWidth - MAX_WIDTH
+        const resistedWidth = Math.min(Math.round(MAX_WIDTH + overshoot * 0.1), MAX_WIDTH + 30)
+        setSidebarWidth(resistedWidth)
+      } else {
+        // Normal smooth resizing
+        setIsSidebarOpen(true)
+        setIsResisting(false)
+        setSidebarWidth(targetWidth)
+        localStorage.setItem('sidebarWidth', targetWidth.toString())
+      }
+    }
+
+    const handleMouseUp = () => {
+      isDraggingRef.current = false
+      setIsDragging(false)
+      setIsResisting(false)
+      document.body.classList.remove('resizing-sidebar')
+
+      // Snap back to bounds if released in resistance zone
+      setSidebarWidth(prev => {
+        let settled = prev
+        if (prev < MIN_WIDTH) settled = MIN_WIDTH
+        else if (prev > MAX_WIDTH) settled = MAX_WIDTH
+        localStorage.setItem('sidebarWidth', settled.toString())
+        return settled
+      })
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+      document.body.classList.remove('resizing-sidebar')
+    }
+  }, [isDragging])
+
   const handleCreateCollection = async (name: string) => {
-    const res = await CollectionService.addCollection({ name })
+    const res     = await CollectionService.addCollection({ name })
     const created = (res as { data?: Collection }).data
     if (created) {
       setCurrentCollections(prev => [...prev, created])
-      if (onCollectionCreated) {
-        onCollectionCreated(created)
-      }
+      onCollectionCreated?.(created)
       navigate(`/${created.id}`)
     }
   }
 
   const handleUpdateCollection = async (newName: string) => {
-    if (!editingCollection) return
-    const res = await CollectionService.updateCollection({ name: newName }, String(editingCollection.id))
-    const updated = (res as { data?: Collection }).data ?? { ...editingCollection, name: newName }
+    if (!editingCol) return
+    const res     = await CollectionService.updateCollection({ name: newName }, String(editingCol.id))
+    const updated = (res as { data?: Collection }).data ?? { ...editingCol, name: newName }
     setCurrentCollections(prev => prev.map(c => (c.id === updated.id ? updated : c)))
-    if (onCollectionUpdated) {
-      onCollectionUpdated(updated)
-    }
-    setEditingCollection(null)
+    onCollectionUpdated?.(updated)
+    setEditingCol(null)
   }
 
   const handleDeleteCollection = async () => {
-    if (!deletingCollection) return
-    const idToDelete = deletingCollection.id
+    if (!deletingCol) return
+    const idToDelete = deletingCol.id
     await CollectionService.deleteCollection(String(idToDelete))
     setCurrentCollections(prev => prev.filter(c => c.id !== idToDelete))
-    if (onCollectionDeleted) {
-      onCollectionDeleted(idToDelete)
-    }
-    setDeletingCollection(null)
-
-    // If current path matches or starts with the deleted collection, navigate to Unsorted
+    onCollectionDeleted?.(idToDelete)
+    setDeletingCol(null)
     const currentPath = window.location.pathname
     if (currentPath === `/${idToDelete}` || currentPath.startsWith(`/${idToDelete}/`)) {
-      navigate('/-1')
+      navigate('/all')
     }
   }
 
   return (
-    <div className="app-layout">
-      <Sidebar
-        collections={currentCollections}
-        userName={userName}
-        userHandle={userHandle}
-        onNewCollection={handleOpenNewCollection}
-        onEditCollection={col => setEditingCollection(col)}
-        onDeleteCollection={col => setDeletingCollection(col)}
-      />
+    <div 
+      className={`app-layout ${!isSidebarOpen ? 'sidebar-closed' : ''}`}
+      style={{ '--sidebar-width': `${isSidebarOpen ? sidebarWidth : 0}px` } as React.CSSProperties}
+    >
+      <div 
+        className={`sidebar-container ${isSidebarOpen ? 'open' : 'closed'} ${isDragging ? 'resizing' : ''} ${isResisting ? 'resisting-min' : ''}`} 
+        style={{ width: isSidebarOpen ? sidebarWidth : 0 }}
+      >
+        <Sidebar
+          collections={currentCollections}
+          noteCounts={noteCounts}
+          totalNoteCount={totalNoteCount}
+          userName={userName}
+          onNewNote={onNewNote}
+          onNewCollection={() => setNewColOpen(true)}
+          onEditCollection={col => setEditingCol(col)}
+          onDeleteCollection={col => setDeletingCol(col)}
+          onClose={() => setIsSidebarOpen(false)}
+        />
+        <div className="sidebar-resizer" onMouseDown={handleMouseDown} />
+      </div>
+
+      {isSidebarOpen && (
+        <div className="sidebar-mobile-overlay" onClick={() => setIsSidebarOpen(false)} />
+      )}
+
       <div className="main-content">
-        {/* Shared topbar — contains breadcrumb/left slot, theme toggle, and extra right controls */}
         <div className="main-topbar">
           <div className="main-topbar-left">
+            {!isSidebarOpen && (
+              <button 
+                className="icon-btn sidebar-toggle-btn" 
+                onClick={() => setIsSidebarOpen(true)}
+                aria-label="Open sidebar"
+              >
+                <MenuIcon />
+              </button>
+            )}
             {topbarLeft}
           </div>
-          <div className="main-topbar-right">
-            {topbarRight}
-            <button
-              id="app-theme-toggle"
-              className="theme-toggle-btn"
-              onClick={toggleTheme}
-              type="button"
-              aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-              title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-            >
-              {theme === 'light' ? <MoonIcon /> : <SunIcon />}
-            </button>
-          </div>
+          <div className="main-topbar-right">{topbarRight}</div>
         </div>
         {children}
       </div>
 
       <NewCollectionModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        isOpen={newColOpen}
+        onClose={() => setNewColOpen(false)}
         onSubmit={handleCreateCollection}
       />
-
       <EditCollectionModal
-        isOpen={Boolean(editingCollection)}
-        initialName={editingCollection?.name}
-        onClose={() => setEditingCollection(null)}
+        isOpen={Boolean(editingCol)}
+        initialName={editingCol?.name}
+        onClose={() => setEditingCol(null)}
         onSubmit={handleUpdateCollection}
       />
-
       <ConfirmModal
-        isOpen={Boolean(deletingCollection)}
-        onClose={() => setDeletingCollection(null)}
+        isOpen={Boolean(deletingCol)}
+        onClose={() => setDeletingCol(null)}
         onConfirm={handleDeleteCollection}
         title="Delete Collection"
-        message={`Are you sure you want to delete "${deletingCollection?.name}"? Notes inside will become unsorted.`}
-        confirmText="Delete Collection"
+        message={`Delete "${deletingCol?.name}"? Notes inside will become unsorted.`}
+        confirmText="Delete"
         isDestructive
       />
     </div>

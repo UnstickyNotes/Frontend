@@ -4,9 +4,9 @@ import AuthPage from '../pages/AuthPage'
 import OAuthErrorPage from '../pages/OAuthErrorPage'
 import CollectionsPage from '../pages/CollectionsPage'
 import NoteDetailPage from '../pages/NoteDetailPage'
-import NoteCreatePage from '../pages/NoteCreatePage'
 import NoteEditPage from '../pages/NoteEditPage'
 import ProfilePage from '../pages/ProfilePage'
+import SettingsPage from '../pages/SettingsPage'
 import type { ReactNode } from 'react'
 
 // ── Route Guards ──────────────────────────────────────────────
@@ -21,7 +21,7 @@ function RequireAuth({ children }: { children: ReactNode }) {
 function RequireGuest({ children }: { children: ReactNode }) {
   const { token, isLoading } = useAuth()
   if (isLoading) return <div className="loading-screen">Loading…</div>
-  if (token) return <Navigate to="/" replace />
+  if (token) return <Navigate to="/all" replace />
   return <>{children}</>
 }
 
@@ -34,19 +34,19 @@ const router = createBrowserRouter([
   },
   {
     path: '/',
-    element: <RequireAuth><CollectionsPage /></RequireAuth>,
+    element: <Navigate to="/all" replace />,
   },
   {
     path: '/profile',
     element: <RequireAuth><ProfilePage /></RequireAuth>,
   },
   {
-    path: '/:collectionId',
-    element: <RequireAuth><CollectionsPage /></RequireAuth>,
+    path: '/settings',
+    element: <RequireAuth><SettingsPage /></RequireAuth>,
   },
   {
-    path: '/:collectionId/new',
-    element: <RequireAuth><NoteCreatePage /></RequireAuth>,
+    path: '/:collectionId',
+    element: <RequireAuth><CollectionsPage /></RequireAuth>,
   },
   {
     path: '/:collectionId/:noteId',
@@ -61,8 +61,7 @@ const router = createBrowserRouter([
     // If the URL contains ?error=, send the user to the error page.
     // Otherwise AuthContext already extracted ?token= — send home.
     path: '/oauth/callback',
-    element: <Navigate to={typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('error') ? `/oauth/error${window.location.search}` : '/'} replace />,
-    // element: <Navigate to={'/'} replace />,
+    element: <Navigate to={typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('error') ? `/oauth/error${window.location.search}` : '/all'} replace />,
   },
   {
     path: '/oauth/error',
@@ -70,7 +69,7 @@ const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: <Navigate to="/" replace />,
+    element: <Navigate to="/all" replace />,
   },
 ])
 

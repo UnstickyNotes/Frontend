@@ -27,7 +27,6 @@ export default function NoteCreatePage() {
   const [error, setError] = useState('')
 
   const userName = [user?.first_name, user?.last_name].filter(Boolean).join(' ')
-  const userHandle = user?.email?.split('@')[0] ?? ''
 
   useEffect(() => {
     CollectionService.getCollections()
@@ -81,7 +80,7 @@ export default function NoteCreatePage() {
   )
 
   return (
-    <AppLayout collections={collections} userName={userName} userHandle={userHandle} topbarLeft={topbarLeft}>
+    <AppLayout collections={collections} userName={userName} topbarLeft={topbarLeft}>
       <div className="main-scroll">
         <form onSubmit={handleSave}>
           {error && <div className="auth-error" style={{ maxWidth: '480px', marginBottom: '0.75rem' }}>{error}</div>}

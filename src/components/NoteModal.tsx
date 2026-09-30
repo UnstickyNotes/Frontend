@@ -1,152 +1,186 @@
 import { useState, useEffect } from 'react'
 import Modal from './Modal'
-import CollectionDropdown from './CollectionDropdown'
+import { COLLECTION_COLORS, UNSORTED_COLOR } from '../utils/collectionColors'
 import type { Collection } from '../types'
-// import { listen } from '@tauri-apps/api/event'
+
+function XIcon() {
+  return (
+    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
 
 interface NoteModalProps {
-  isOpen: boolean
-  mode: 'create' | 'edit'
-  initialTitle?: string
-  initialBody?: string
+  isOpen:               boolean
+  mode:                 'create' | 'edit'
+  initialTitle?:        string
+  initialBody?:         string
   initialCollectionId?: number
-  collections?: Collection[]
-  onClose: () => void
-  onSubmit: (data: { title?: string; body?: string; collectionId?: number }) => Promise<void> | void
+  collections?:         Collection[]
+  onClose:              () => void
+  onSubmit:             (data: { title?: string; body?: string; collectionId?: number }) => Promise<void> | void
 }
 
 export default function NoteModal({
   isOpen,
   mode,
-  initialTitle = '',
-  initialBody = '',
+  initialTitle        = '',
+  initialBody         = '',
   initialCollectionId,
-  collections = [],
+  collections         = [],
   onClose,
   onSubmit,
 }: NoteModalProps) {
-  const [title, setTitle] = useState(initialTitle)
-  const [body, setBody] = useState(initialBody)
-  const [selectedCollectionId, setSelectedCollectionId] = useState<number | undefined>(initialCollectionId)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [title,               setTitle]               = useState(initialTitle)
+  const [body,                setBody]                = useState(initialBody)
+  const [selectedColId,       setSelectedColId]       = useState<number | undefined>(initialCollectionId)
+  const [loading,             setLoading]             = useState(false)
+  const [error,               setError]               = useState('')
 
-  // Reset fields every time the modal opens
+  // Reset every time modal opens
   useEffect(() => {
     if (isOpen) {
       setTitle(initialTitle)
       setBody(initialBody)
-      setSelectedCollectionId(initialCollectionId)
+      setSelectedColId(initialCollectionId)
       setError('')
       setLoading(false)
-      // window.addEventListener('keydown', (e)=>{
-      //   if(e.key === 'Enter') onSubmit({
-      //     title: initialTitle.trim(),
-      //     body: initialBody.trim(),
-      //     collectionId: initialCollectionId
-      //   })
-      // })
     }
   }, [isOpen, initialTitle, initialBody, initialCollectionId])
 
-  const handleSubmit = async (e: React.SubmitEvent) => {
-    e.preventDefault()
-    const trimmedTitle = title.trim()
-    const trimmedBody = body.trim()
-
-    if (!trimmedTitle && !trimmedBody) {
-      setError('Please enter a card title or content.')
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    const trimTitle = title.trim()
+    const trimBody  = body.trim()
+    if (!trimTitle && !trimBody) {
+      setError('Please enter a note title or content.')
       return
     }
-
     setLoading(true)
     setError('')
     try {
       await onSubmit({
-        title: trimmedTitle || undefined,
-        body: trimmedBody || undefined,
-        collectionId: selectedCollectionId,
+        title:        trimTitle || undefined,
+        body:         trimBody  || undefined,
+        collectionId: selectedColId,
       })
       onClose()
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || 'Could not save the card.')
+      setError(err?.response?.data?.message || err?.message || 'Could not save the note.')
     } finally {
       setLoading(false)
     }
   }
 
-  const isEdit = mode === 'edit'
-  const hasContent = Boolean(title.trim() || body.trim())
-  const isUnchanged =
-    isEdit &&
-    title.trim() === initialTitle &&
-    body.trim() === initialBody &&
-    selectedCollectionId === initialCollectionId
+  const isEdit      = mode === 'edit'
+  const hasContent  = Boolean(title.trim() || body.trim())
+  const isUnchanged = isEdit
+    && title.trim() === initialTitle
+    && body.trim()  === initialBody
+    && selectedColId === initialCollectionId
+
+  // Real collections (no Unsorted in the list — Unsorted is a separate chip)
+  const realCollections = collections.filter(c => c.id !== -1 && String(c.id) !== '-1')
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} maxWidth="480px">
+    <Modal isOpen={isOpen} onClose={onClose} onConfirm={() => handleSubmit()} maxWidth="510px" showAccentBar>
       <form onSubmit={handleSubmit} noValidate>
+        {/* Header */}
         <div className="modal-header">
-          <h3 className="modal-title">{isEdit ? 'Edit Card' : 'New Card'}</h3>
-          <p className="modal-subtitle">
-            {isEdit ? 'Update your card title and content.' : 'Add a new card to this collection.'}
-          </p>
+          <h3 className="modal-title">{isEdit ? 'Edit note' : 'New note'}</h3>
+          <button className="modal-close-btn" type="button" onClick={onClose} aria-label="Close">
+            <XIcon />
+          </button>
         </div>
 
-        {error && <div className="auth-error" style={{ marginBottom: '1rem' }}>{error}</div>}
+        {error && <div className="auth-error">{error}</div>}
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label htmlFor="note-modal-title" className="modal-label">
-            Title
-          </label>
+        {/* Title */}
+        <div className="modal-field">
+          <label htmlFor="note-modal-title" className="modal-label">Title</label>
           <input
             id="note-modal-title"
-            className="auth-input"
+            className="modal-input"
             type="text"
-            placeholder="Card title…"
+            placeholder="Note title..."
             value={title}
             onChange={e => setTitle(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                handleSubmit()
+              }
+            }}
             autoFocus
           />
         </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label htmlFor="note-modal-body" className="modal-label">
-            Content
-          </label>
+        {/* Content */}
+        <div className="modal-field">
+          <label htmlFor="note-modal-body" className="modal-label">Content</label>
           <textarea
             id="note-modal-body"
-            className="auth-input note-modal-textarea"
-            placeholder="Write card content…"
+            className="modal-input modal-textarea"
+            placeholder="Start writing..."
             value={body}
             onChange={e => setBody(e.target.value)}
-            rows={5}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                handleSubmit()
+              }
+            }}
           />
         </div>
 
-        {/* Collection picker */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          <label className="modal-label" style={{ display: 'block', marginBottom: '0.375rem' }}>
-            Collection
-          </label>
-          <CollectionDropdown
-            collections={collections}
-            value={selectedCollectionId}
-            onChange={(id) => setSelectedCollectionId(Number(id))}
-            placement="up"
-          />
-        </div>
+        {/* Collection chips */}
+        {realCollections.length > 0 && (
+          <div className="modal-field">
+            <label className="modal-label">Collection</label>
+            <div className="modal-chips">
+              {/* Unsorted */}
+              <button
+                type="button"
+                className={`collection-chip${!selectedColId || selectedColId === -1 ? ' active' : ''}`}
+                onClick={() => setSelectedColId(-1)}
+              >
+                <span className="chip-dot" style={{ background: UNSORTED_COLOR }} />
+                Unsorted
+              </button>
 
+              {realCollections.map((col, idx) => (
+                <button
+                  type="button"
+                  key={String(col.id)}
+                  className={`collection-chip${Number(selectedColId) === Number(col.id) ? ' active' : ''}`}
+                  onClick={() => setSelectedColId(Number(col.id))}
+                >
+                  <span
+                    className="chip-dot"
+                    style={{ background: COLLECTION_COLORS[idx % COLLECTION_COLORS.length] }}
+                  />
+                  {col.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Actions */}
         <div className="modal-actions">
           <button className="btn-cancel" type="button" onClick={onClose} disabled={loading}>
             Cancel
           </button>
           <button
-            className="btn-primary"
+            className="btn-save"
             type="submit"
             disabled={loading || !hasContent || isUnchanged}
+            style={{ flex: 1 }}
           >
-            {loading ? (isEdit ? 'Saving…' : 'Creating…') : isEdit ? 'Save Changes' : 'Create Card'}
+            {loading
+              ? (isEdit ? 'Saving…' : 'Creating…')
+              : (isEdit ? 'Save changes' : 'Save note')}
           </button>
         </div>
       </form>
