@@ -82,10 +82,10 @@ pub fn run() {
                 tauri_plugin_global_shortcut::Builder::new()
                     .with_handler(move |app, sc, event| {
                         // Print EVERY event that reaches the app
-                        println!("RECEIVED KEY EVENT: sc={:?}, state={:?}", sc, event.state());
+                        // println!("RECEIVED KEY EVENT: sc={:?}, state={:?}", sc, event.state());
 
                         if event.state() == ShortcutState::Pressed && sc == &hotkey {
-                            println!("🔥 HOTKEY MATCHED! Bumping window...");
+                            // println!("🔥 HOTKEY MATCHED! Bumping window...");
                             if let Some(window) = app.get_webview_window("main") {
                                 let _ = window.show();
                                 let _ = window.unminimize();
