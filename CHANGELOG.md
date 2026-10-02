@@ -1,11 +1,6 @@
-# Changelog
+# Change-log
 
-All notable changes to Unsticky Notes are listed here.
-Changes are grouped after the **UI Rework** milestone (commit `2f85a13`).
-
----
-
-## [Unreleased] — Post UI Rework
+## Post UI Rework
 
 ### UI / Design
 
@@ -41,27 +36,3 @@ Changes are grouped after the **UI Rework** milestone (commit `2f85a13`).
 
 ---
 
-## UI Rework Baseline — `2f85a13`
-
-> *"the whole ui rebuilt new design new look"*
-
-This commit replaced the previous interface with a fully redesigned layout including sidebar navigation, masonry note grid, redesigned modals, and a new CSS design system.
-
----
-
-## Pre-Rework
-
-### `caa5236` — Global Shortcut + Quick Note modal
-Added the Quick Note modal and registered the global keyboard shortcut in Tauri so it can be triggered from anywhere on the system.
-
-### `3f69c49` — Backend connectivity fix
-Changed API base URL from `localhost` to `.onrender.com` for production sync.
-
-### `5b4fb95` — Global shortcut implementation
-Global shortcut registered and working; pending cross-platform testing on Windows.
-
-### `ad3945f` — Autostart and tray options
-Configured autostart-on-login and system tray menu options.
-
-### `212239` — Lock file cleanup
-Removed `pnpm-lock.yml` that was causing build errors.
