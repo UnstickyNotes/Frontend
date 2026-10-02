@@ -133,7 +133,7 @@ export const deleteCollection = async(id:string) => {
                     )
                 )
             )`, [user_id, 'collection', id, 'CREATE', 'UPDATE', 'CREATE'])
-        console.log(prev)
+        // console.log(prev, " prev col")
         if(prev.length > 0){
             const operations = prev.map((i) => {return dequeueById(i.id)})
             try{

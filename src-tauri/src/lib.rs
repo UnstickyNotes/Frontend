@@ -163,6 +163,7 @@ pub fn run() {
               api.prevent_close();
           }
         })
+      
       .run(tauri::generate_context!())
       .expect("error while running tauri application");
   }

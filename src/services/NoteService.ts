@@ -128,12 +128,24 @@ export const deleteNote = async (id: string | number) => {
 
     const res = await db.execute("DELETE FROM notes WHERE id = ? AND user_id = ?", [id, user_id])
     if(res.rowsAffected){
-        const prev = await db.select<Array<Record<string, any>>>(
-            `SELECT * FROM sync_queue 
+        const prev = await db.select<Record<string, any>[]>(
+            `SELECT * FROM sync_queue s 
             WHERE user_id = ? 
             AND entity_type = ? 
             AND entity_id = ? 
-            AND action IN (?, ?)`, [user_id, 'note', id, 'CREATE', 'UPDATE'])
+            AND (
+                action = ? OR (
+                action = ? AND EXISTS (
+                    SELECT 1
+                    FROM sync_queue q
+                    WHERE q.user_id = s.user_id
+                        AND q.entity_type = s.entity_type
+                        AND q.entity_id = s.entity_id
+                        AND action = ?
+                    )
+                )
+            )`, [user_id, 'note', id, 'CREATE', 'UPDATE', 'CREATE'])
+        // console.log(prev, " prev note")
         if(prev.length > 0){
             const operations = prev.map((i) => {return dequeueById(i.id)})
             try{

@@ -1,6 +1,7 @@
 // import { useOnlineStatus } from "../contexts/OnlineContext"
 import { checkUserOffline } from "../services/AuthService"
 import { pull, push } from "./syncApi"
+import { dequeue } from "../db/SyncQueue";
 import type { CollectionAttributes, NoteAttributes, SyncQueueAttrbutes } from '../types/index';
 import getDB from "../db/dbClient";
 import { checkOnlineStatus } from "./network";
@@ -80,18 +81,26 @@ export const requestPush = async() => {
                         const dbres = await db.execute(`UPDATE collections SET sync_status = ?, remote_id = ? WHERE id = ?`, ['synced', p.id, p.local_id])
                         console.log(p)
                         if(dbres.rowsAffected){
-                            await db.execute(`DELETE FROM sync_queue WHERE entity_type = ? AND entity_id = ?`, ['collection', p.local_id])
+                            // await db.execute(`DELETE FROM sync_queue WHERE entity_type = ? AND entity_id = ?`, ['collection', p.local_id])
+                            await dequeue(p.local_id, 'collection')
                         }
                 }
                 else{
                     const dbres = await db.execute(`UPDATE notes SET sync_status = ?, remote_id = ? WHERE id = ?`, ['synced', p.id, p.local_id])
                     console.log(p)
                     if(dbres.rowsAffected){
-                        await db.execute(`DELETE FROM sync_queue WHERE entity_type = ? AND entity_id = ?`, ['note', p.local_id])
+                        // await db.execute(`DELETE FROM sync_queue WHERE entity_type = ? AND entity_id = ?`, ['note', p.local_id])
+                        await dequeue(p.local_id, 'note')
                     }
                 }
             }else{
-                await db.execute(`DELETE FROM sync_queue WHERE entity_type = ? AND entity_id = ?`, ['collection', p.local_id])
+                if(p.type == 'collection'){
+                    await dequeue(p.local_id, 'collection')
+                    // await db.execute(`DELETE FROM sync_queue WHERE entity_type = ? AND entity_id = ?`, ['collection', p.local_id])
+                }else{
+                    await dequeue(p.local_id, 'note')
+                    // await db.execute(`DELETE FROM sync_queue WHERE entity_type = ? AND entity_id = ?`, ['note', p.local_id])
+                }
             }
         }
         await db.execute(`UPDATE users SET last_synced_at = ? WHERE id = ?`, [synced_at, user_id])

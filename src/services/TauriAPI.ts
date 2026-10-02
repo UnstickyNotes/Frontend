@@ -1,1 +1,0 @@
-// import { onOpenUrl,getCurrent } from "@tauri-apps/plugin-deep-link";

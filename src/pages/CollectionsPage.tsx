@@ -246,9 +246,20 @@ export default function CollectionsPage() {
             <p className="empty-state-title">
               {searchQuery ? 'No notes match your search' : 'No notes here yet'}
             </p>
-            <p className="empty-state-sub">
-              {searchQuery ? 'Try a different keyword' : 'Click "+ New Note" to create one'}
-            </p>
+            {!searchQuery && (
+              <button
+                className="empty-state-add-btn"
+                type="button"
+                onClick={handleNewNote}
+                aria-label="Add a note"
+              >
+                <span className="empty-state-add-plus">+</span>
+                <span className="empty-state-add-label">Add Note</span>
+              </button>
+            )}
+            {searchQuery && (
+              <p className="empty-state-sub">Try a different keyword</p>
+            )}
           </div>
         ) : (
           <div className="notes-masonry">
@@ -305,8 +316,7 @@ export default function CollectionsPage() {
         accentColor={getCollectionColor(deletingNote?.collection_id ?? deletingNote?.collectionId, collections)}
       />
 
-      {/* Help button */}
-      <button className="help-btn" type="button" title="Help" aria-label="Help">?</button>
+
     </AppLayout>
   )
 }
