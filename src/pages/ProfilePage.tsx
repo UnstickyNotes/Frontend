@@ -71,7 +71,6 @@ interface InlineEditProps {
 
 function InlineEditField({ label, value, onSave, type = 'text' }: InlineEditProps) {
   const [editing, setEditing] = useState(false)
-  const {user} = useAuth()
   const [draft, setDraft]     = useState(type === 'password' ? '' : value)
   const [saving, setSaving]   = useState(false)
   const [error, setError]     = useState('')
