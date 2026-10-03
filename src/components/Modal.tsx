@@ -23,6 +23,14 @@ export default function Modal({
 }: ModalProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // Keep latest callbacks in refs so the effect doesn't need them as dependencies.
+  // This prevents the effect from re-firing (and re-stealing focus) every time the
+  // parent re-renders and passes a new arrow-function reference for onClose/onConfirm.
+  const onCloseRef   = useRef(onClose)
+  const onConfirmRef = useRef(onConfirm)
+  useEffect(() => { onCloseRef.current   = onClose   }, [onClose])
+  useEffect(() => { onConfirmRef.current = onConfirm }, [onConfirm])
+
   useEffect(() => {
     if (!isOpen) return
 
@@ -44,7 +52,7 @@ export default function Modal({
         e.preventDefault()
         e.stopPropagation()
         e.stopImmediatePropagation()
-        onClose()
+        onCloseRef.current()
       } else if (e.key === 'Enter') {
         const target = e.target as HTMLElement
         // If user is in a textarea and holds Shift, allow normal newline insertion
@@ -67,8 +75,8 @@ export default function Modal({
         e.stopPropagation()
         e.stopImmediatePropagation()
 
-        if (onConfirm) {
-          onConfirm()
+        if (onConfirmRef.current) {
+          onConfirmRef.current()
         } else {
           // Look for submit or confirm button
           const submitBtn = containerRef.current?.querySelector<HTMLButtonElement>(
@@ -90,7 +98,7 @@ export default function Modal({
       window.removeEventListener('keydown', handleKeyDown, true)
       document.body.style.overflow = ''
     }
-  }, [isOpen, onClose, onConfirm])
+  }, [isOpen])
 
   if (!isOpen) return null
 

@@ -120,7 +120,6 @@ export default function NoteModal({
                 handleSubmit()
               }
             }}
-            autoFocus
           />
         </div>
 

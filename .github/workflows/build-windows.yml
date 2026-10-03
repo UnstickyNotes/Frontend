@@ -38,6 +38,7 @@ jobs:
 
       # 3. FIXED: Target the correct project directory
       - name: Install dependencies
+        run: npm install
         run: npm ci
 
       - name: Build Tauri Windows Executable

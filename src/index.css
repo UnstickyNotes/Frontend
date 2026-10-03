@@ -125,7 +125,7 @@ body {
 
 /* ── Base Styles ── */
 html {
-  zoom: 2.0;
+  zoom: 1.75;
   font-family: var(--font-sans);
   font-size: 14px;
   line-height: 1.6;

@@ -12,7 +12,7 @@ import type { Collection, Note } from '../types'
 
 function SearchIcon() {
   return (
-    <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+    <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24" aria-hidden="true">
       <circle cx="11" cy="11" r="8" strokeLinecap="round" strokeLinejoin="round" />
       <path d="m21 21-4.35-4.35" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
@@ -21,7 +21,7 @@ function SearchIcon() {
 
 function PlusIcon() {
   return (
-    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true">
+    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" aria-hidden="true">
       <path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )

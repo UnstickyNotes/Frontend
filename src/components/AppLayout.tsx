@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type ReactNode } from 'react'
+import { useState, useEffect, useRef, useMemo, type ReactNode } from 'react'
 import { useNavigate } from 'react-router'
 import { listen } from '@tauri-apps/api/event'
 import Sidebar from './Sidebar'
@@ -6,7 +6,7 @@ import NewCollectionModal from './NewCollectionModal'
 import EditCollectionModal from './EditCollectionModal'
 import ConfirmModal from './ConfirmModal'
 import QuickNoteModal from './QuickNoteModal'
-import { type Collection } from '../types'
+import { type Collection, type Note } from '../types'
 import { getCollectionColor } from '../utils/collectionColors'
 import * as CollectionService from '../services/CollectionService'
 import * as NoteService from '../services/NoteService'
@@ -46,8 +46,7 @@ const SPEED_RATIO = 0.85
 export default function AppLayout({
   children,
   collections,
-  noteCounts = {},
-  totalNoteCount = 0,
+  // noteCounts and totalNoteCount are now computed internally — props ignored
   userName,
   onNewNote,
   onCollectionCreated,
@@ -74,6 +73,35 @@ export default function AppLayout({
   const startWidthRef = useRef(0)
 
   const [quickNoteOpen, setQuickNoteOpen] = useState(false)
+
+  // ── Note counts (owned here so they persist across all pages) ──
+  const [allNotes, setAllNotes] = useState<Note[]>([])
+
+  const fetchAllNotes = async () => {
+    try {
+      const res = await NoteService.getAllNotes()
+      setAllNotes((res as { data?: Note[] }).data ?? [])
+    } catch { /* ignore */ }
+  }
+
+  useEffect(() => { fetchAllNotes() }, [])
+
+  useEffect(() => {
+    window.addEventListener('notes-updated', fetchAllNotes)
+    return () => window.removeEventListener('notes-updated', fetchAllNotes)
+  }, [])
+
+  const internalNoteCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    allNotes.forEach(n => {
+      const cId = n.collection_id ?? n.collectionId
+      const key = cId === null || cId === undefined || cId === -1 ? '-1' : String(cId)
+      counts[key] = (counts[key] ?? 0) + 1
+    })
+    return counts
+  }, [allNotes])
+
+  const internalTotalCount = allNotes.length
 
   useEffect(() => { setCurrentCollections(collections) }, [collections])
 
@@ -227,8 +255,8 @@ export default function AppLayout({
       >
         <Sidebar
           collections={currentCollections}
-          noteCounts={noteCounts}
-          totalNoteCount={totalNoteCount}
+          noteCounts={internalNoteCounts}
+          totalNoteCount={internalTotalCount}
           userName={userName}
           onNewNote={onNewNote}
           onNewCollection={() => setNewColOpen(true)}
