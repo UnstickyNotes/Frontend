@@ -4,6 +4,7 @@ import { useTheme } from '../contexts/ThemeContext'
 import { useAuth } from '../contexts/AuthContext'
 import PasswordInput from '../components/PasswordInput'
 import { openUrl } from '@tauri-apps/plugin-opener'
+import { OUTPUT_URL } from '../services/api'
 
 // ── Icons ─────────────────────────────────────────────────────
 
@@ -70,7 +71,7 @@ function SignInForm() {
 
   const handleGoogle = async () => {
     setGoogleLoad(true)
-    await openUrl('https://unstickynotes-api.onrender.com/api/OAuth/google/redirect')
+    await openUrl(OUTPUT_URL + '/api/OAuth/google/redirect')
   }
 
   return (
@@ -148,7 +149,7 @@ function SignUpForm() {
 
   const handleGoogle = async () => {
     setGoogleLoad(true)
-    await openUrl('https://unstickynotes-api.onrender.com/api/OAuth/google/redirect')
+    await openUrl(OUTPUT_URL + '/api/OAuth/google/redirect')
   }
 
   return (
@@ -288,7 +289,7 @@ export default function AuthPage() {
       </footer>
 
       {/* Help */}
-      <button className="help-btn" type="button" title="Help" aria-label="Help">?</button>
+      {/* <button className="help-btn" type="button" title="Help" aria-label="Help">?</button> */}
     </div>
   )
 }

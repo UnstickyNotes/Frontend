@@ -1,4 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { useTheme } from './ThemeContext';
+// import type { Theme } from './ThemeContext'
 
 export type FontSize = 'small' | 'medium' | 'large'
 export type FontFamily = 'plus-jakarta' | 'inter' | 'lato' | 'georgia'
@@ -31,12 +33,16 @@ const SettingsContext = createContext<SettingsContextValue>({
 })
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
+  const { theme, setTheme } = useTheme()
   const [fontSize, setFontSizeState] = useState<FontSize>(
     () => (localStorage.getItem('un-font-size') as FontSize) || 'medium'
   )
   const [fontFamily, setFontFamilyState] = useState<FontFamily>(
     () => (localStorage.getItem('un-font-family') as FontFamily) || 'plus-jakarta'
   )
+  // const [theme, setTheme] = useState<Theme>(
+  //   () => (localStorage.getItem('un-theme') as Theme || 'system')
+  // )
 
   // Apply font-size to <html>
   useEffect(() => {
@@ -49,6 +55,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     document.documentElement.style.setProperty('--font-sans', FONT_FAMILY_VALUES[fontFamily])
     localStorage.setItem('un-font-family', fontFamily)
   }, [fontFamily])
+
+  //Apply theme
+  useEffect(() => {
+    localStorage.setItem('un-theme', theme)
+    setTheme(theme)
+  },[theme])
 
   const setFontSize   = (s: FontSize)   => setFontSizeState(s)
   const setFontFamily = (f: FontFamily) => setFontFamilyState(f)

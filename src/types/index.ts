@@ -22,6 +22,7 @@ export interface User {
     avatar_url? : string | null,
     avatarUrl? : string | null,
     avatar? : string | null,
+    Oauth_provider? : string
     created_at? : string,
     updated_at? : string,
     last_synced_at? : string

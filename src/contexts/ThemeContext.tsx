@@ -17,8 +17,9 @@ const ThemeContext = createContext<ThemeContextValue>({
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     const stored = localStorage.getItem('un-theme')
-    if (stored === 'dark' || stored === 'light' || stored === 'system') return stored as Theme
-    return 'system'
+    return (stored) ? stored as Theme : 'system'
+    // if (stored === 'dark' || stored === 'light' || stored === 'system') return stored as Theme
+    // return 'system'
   })
 
   useEffect(() => {
@@ -53,7 +54,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const setTheme = (t: Theme) => setThemeState(t)
   const toggleTheme = () => setThemeState(t => {
     if (t === 'light') return 'dark'
-    if (t === 'dark') return 'system'
+    // if (t === 'dark') return 'system'
     return 'light'
   })
 

@@ -28,8 +28,8 @@ export const register_user_offline = async(user:User) => {
     const db = await getDB()
     const userOffline = await checkUserOffline()
     if(!userOffline){
-        const res = await db.execute(`INSERT INTO users (id, first_name, last_name, email, last_synced_at)
-                                    VALUES (?, ?, ?, ?, ?)`, [user.id, user.first_name, user.last_name, user.email, user.last_synced_at]);
+        const res = await db.execute(`INSERT INTO users (id, first_name, last_name, email, OAuthProvider, last_synced_at)
+                                    VALUES (?, ?, ?, ?, ?,?)`, [user.id, user.first_name, user.last_name, user.email, user.Oauth_provider, user.last_synced_at]);
         if (res.rowsAffected){  
             return user
         }
@@ -46,19 +46,19 @@ export const register = async(credentials:RegisterCredentials) => {
         first_name: credentials.first_name ?? credentials.firstName,
         last_name: credentials.last_name ?? credentials.lastName,
     };
-    const response = await api.post<Response<User>>('/register', payload);
+    const response = await api.post<Response<User>>('api/register', payload);
 
     return response.data;
 }
 
 export const login = async(credentials:LoginCredentials) => {
-    const response = await api.post<AuthResponse>('/login', credentials);
+    const response = await api.post<AuthResponse>('api/login', credentials);
     
     return response.data;
 }
 
 export const logout = async() => {
-    const response = await api.post<Response<User>>('/logout');
+    const response = await api.post<Response<User>>('api/logout');
     
     return response.data;
 }

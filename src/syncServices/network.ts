@@ -1,3 +1,4 @@
+import { OUTPUT_URL } from "../services/api";
 type Listner = (status:boolean) => void;
 
 let isOnlineStatus = navigator.onLine
@@ -33,7 +34,7 @@ export async function checkOnlineStatus (){
     }
 
     try{
-        const res = await fetch('https://unstickynotes-api.onrender.com/api/ping', {
+        const res = await fetch(`${OUTPUT_URL}/api/ping`, {
             method:'HEAD',
             cache: 'no-store',
             signal: AbortSignal.timeout(8000),

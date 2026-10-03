@@ -1,4 +1,5 @@
 import api from "./api";
+// import { response } from './Response';
 import type {
     Response,
     User,
@@ -6,7 +7,8 @@ import type {
 } from "../types";
 
 export const getProfile = async() => {
-    const response = await api.get<Response<User>>('/profile');
+    const response = await api.get<Response<User>>('api/profile');
+    console.log(response.data.data)
     return response.data;
 }
 export const setPfp = async(file: File | FormData) => {
@@ -16,7 +18,7 @@ export const setPfp = async(file: File | FormData) => {
         formData.append('image', file);
         formData.append('pfp', file);
     }
-    const response = await api.post<Response<User>>('/profile/setPfp', formData, {
+    const response = await api.post<Response<User>>('api/profile/setPfp', formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },
@@ -25,7 +27,7 @@ export const setPfp = async(file: File | FormData) => {
 }
 
 export const deletePfp = async() => {
-    const response = await api.delete<Response<User>>('/profile/pfp');
+    const response = await api.delete<Response<User>>('api/profile/pfp');
     return response.data;
 }
 
@@ -37,11 +39,16 @@ export const updateProfile = async(updateInfo:UserAttributes) => {
         first_name: updateInfo.first_name ?? updateInfo.firstName,
         last_name: updateInfo.last_name ?? updateInfo.lastName,
     };
-    const response = await api.put<Response<User>>('/profile', payload);
+    const response = await api.put<Response<User>>('api/profile', payload);
     return response.data;
 }
 
-export const deleteAccount = async(password:string) => {
-    const response = await api.delete<Response<User>>(`/profile/${password}`);
+export const deleteAccount = async(usedOauth:boolean, password?:string) => {
+    const url:string = usedOauth
+    ? `api/profile`
+    : `api/profile/?password=${password}`
+
+
+    const response = await api.delete<Response<User>>(url);
     return response.data;
 }

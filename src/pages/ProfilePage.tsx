@@ -9,12 +9,13 @@ import * as CollectionService from '../services/CollectionService'
 import * as ProfileService from '../services/ProfileService'
 import { AvatarCacheService } from '../services/AvatarCacheService'
 import type { Collection } from '../types'
+import { OUTPUT_URL } from '../services/api'
 
 // ── Icons ─────────────────────────────────────────────────────
 
 function PencilIcon() {
   return (
-    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24" aria-hidden="true">
       <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
@@ -22,7 +23,7 @@ function PencilIcon() {
 
 function LockIcon() {
   return (
-    <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+    <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24" aria-hidden="true">
       <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
@@ -30,7 +31,7 @@ function LockIcon() {
 
 function LogOutIcon() {
   return (
-    <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true">
+    <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" aria-hidden="true">
       <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
@@ -38,7 +39,7 @@ function LogOutIcon() {
 
 function TrashIcon() {
   return (
-    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true">
+    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" aria-hidden="true">
       <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
@@ -46,7 +47,7 @@ function TrashIcon() {
 
 function CameraIcon() {
   return (
-    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24" aria-hidden="true">
       <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round" />
       <circle cx="12" cy="13" r="4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
@@ -70,6 +71,7 @@ interface InlineEditProps {
 
 function InlineEditField({ label, value, onSave, type = 'text' }: InlineEditProps) {
   const [editing, setEditing] = useState(false)
+  const {user} = useAuth()
   const [draft, setDraft]     = useState(type === 'password' ? '' : value)
   const [saving, setSaving]   = useState(false)
   const [error, setError]     = useState('')
@@ -158,9 +160,30 @@ export default function ProfilePage() {
   const avatarContainerRef = useRef<HTMLDivElement>(null)
 
   const [deleteAccountModal, setDeleteAccountModal] = useState(false)
+  const [deleteOAccountModal, setDeleteOAccountModal] = useState(false)
   const [deletePassword, setDeletePassword] = useState('')
   const [deleting, setDeleting] = useState(false)
 
+  const [deleteFlag, setDeleteFlag] = useState('')
+  const deletingFlags = [
+    'im a bitch',
+    'imabitch',
+    'im abitch',
+    'i am a bitch',
+    'im bitch',
+    'i am bitch',
+    'ima bitch',
+  ]
+  const isDeleteFlags = (input:string) => {
+    console.log(user?.Oauth_provider)
+    for(let f of deletingFlags){
+      if (input.toLowerCase() === f) return true
+    }
+    return false
+  }
+
+  const usedOauth = (user?.Oauth_provider !== 'local') ? true : false
+  
   useEffect(() => {
     CollectionService.getCollections()
       .then(res => setCollections((res as { data?: Collection[] }).data ?? []))
@@ -172,10 +195,10 @@ export default function ProfilePage() {
     if (!user?.id) { setAvatarSrc(null); setImgError(false); return }
     const cached = AvatarCacheService.getCachedAvatar(user.id)
     if (cached) { setAvatarSrc(cached); setImgError(false); return }
-    const raw = user?.avatar_url || user?.avatarUrl || user?.avatar || null
+    const raw = user?.avatar_url || user?.avatarUrl || null
     if (!raw) { setAvatarSrc(null); setImgError(false); return }
     const url = raw.startsWith('http') || raw.startsWith('data:')
-      ? raw : `https://unstickynotes-api.onrender.com${raw.startsWith('/') ? '' : '/'}${raw}`
+      ? raw : `${OUTPUT_URL}${raw.startsWith('/') ? '' : '/'}${raw}`
     setAvatarSrc(url)
     setImgError(false)
   }, [user])
@@ -227,12 +250,24 @@ export default function ProfilePage() {
     if (!deletePassword) return
     setDeleting(true)
     try {
-      await ProfileService.deleteAccount(deletePassword)
+      await ProfileService.deleteAccount(usedOauth, deletePassword)
       await logout()
       navigate('/login')
     } catch {
       setDeleting(false)
     }
+  }
+  const handleDeleteOAccount = async() => {
+    console.log('deleting')
+    setDeleting(true)
+    try {
+      await ProfileService.deleteAccount(usedOauth)
+      await logout()
+      navigate('/login')
+    } catch {
+      setDeleting(false)
+    }
+    finally{setDeleting(false)}
   }
 
   const initials = getInitials(user?.first_name, user?.last_name)
@@ -278,20 +313,16 @@ export default function ProfilePage() {
             </div>
             <h2 className="profile-name">{fullName}</h2>
             <p className="profile-email">{user?.email}</p>
+            <p className="profile-email">ID - {user?.id ?? '—'}</p>
           </div>
 
           {/* Stats Row */}
-          <div className="profile-stats">
+          {/* <div className="profile-stats">
             <div className="profile-stat-card">
-              <div className="profile-stat-value">{collections.length}</div>
-              <div className="profile-stat-label">Collections</div>
-            </div>
-
-            <div className="profile-stat-card">
-              <div className="profile-stat-value">{user?.id ?? '—'}</div>
+              <div className="profile-stat-value">{}</div>
               <div className="profile-stat-label">User ID</div>
             </div>
-          </div>
+          </div> */}
 
           {/* Profile Fields */}
           <div className="profile-card">
@@ -314,22 +345,32 @@ export default function ProfilePage() {
               <span className="readonly-badge"><LockIcon /> Read Only</span>
             </div>
           </div>
-
-          <div className="profile-card">
-            <div className="profile-card-header">Security</div>
-            <InlineEditField
-              label="Password"
-              value="••••••••••••"
-              type="password"
-              onSave={async val => { await ProfileService.updateProfile({ password: val }) }}
-            />
-          </div>
-
+          { !usedOauth ? (
+            <div className="profile-card">
+              <div className="profile-card-header">Security</div>
+              <InlineEditField
+                label="Password"
+                value="Change Password"
+                type="password"
+                onSave={async val => { await ProfileService.updateProfile({ password: val }) }}
+              />
+            </div>
+            ) : (
+               <div>
+                {/* REMOVED SECURITY CARD WHEN USER USE OAuth TO SIGN UP */}
+              </div>
+            )
+          }
           {/* Actions */}
           <button className="signout-btn" onClick={() => setSignOutModal(true)}>
             <LogOutIcon /> Sign Out
           </button>
-          <button className="delete-account-btn" onClick={() => setDeleteAccountModal(true)}>
+          <button className="delete-account-btn" onClick={() => {
+            usedOauth 
+            ? setDeleteOAccountModal(true)
+            : setDeleteAccountModal(true)
+          }
+            }>
             <TrashIcon /> Delete Account
           </button>
 
@@ -373,6 +414,32 @@ export default function ProfilePage() {
           <div className="modal-actions">
             <button className="btn-cancel" type="button" onClick={() => setDeleteAccountModal(false)}>Cancel</button>
             <button className="btn-destructive" type="submit" disabled={deleting || !deletePassword} style={{ flex: 1 }}>
+              {deleting ? 'Deleting…' : 'Delete Account'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal isOpen={deleteOAccountModal} onClose={() => setDeleteOAccountModal(false)} maxWidth="400px">
+        <form onSubmit={handleDeleteAccount}>
+          <div className="modal-header">
+            <h3 className="modal-title">Delete Account</h3>
+          </div>
+          <p className="modal-subtitle">This action is permanent and cannot be undone.</p>
+          <div className="modal-field" style={{ marginTop: '1rem' }}>
+            <label className="modal-label">Please, Write "Im a bitch" to delete your accout.</label>
+            <input
+            // value={usedOauth? 'true':'false'}
+              onChange={e => setDeleteFlag(e.target.value)}
+              required autoFocus
+            />
+          </div>
+          <div className="modal-actions">
+            <button className="btn-cancel" type="button" onClick={() => setDeleteOAccountModal(false)}>Cancel</button>
+            <button className="btn-destructive" onClick={(() => {
+              handleDeleteOAccount
+              setDeleteOAccountModal(false)
+            })} disabled={deleting || !isDeleteFlags(deleteFlag)} style={{ flex: 1 }}>
               {deleting ? 'Deleting…' : 'Delete Account'}
             </button>
           </div>

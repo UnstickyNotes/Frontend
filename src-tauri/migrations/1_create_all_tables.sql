@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
     first_name TEXT NOT NULL,
     last_name TEXT NULL,
     email TEXT NOT NULL UNIQUE,
+    OAuthProvider TEXT DEFAULT 'local',
     last_synced_at DATETIME NULL
 );
 

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams, Link } from 'react-router'
 import { useAuth } from '../contexts/AuthContext'
 import { getCollectionColor, UNSORTED_COLOR } from '../utils/collectionColors'
+import { OUTPUT_URL } from '../services/api'
 import type { Collection } from '../types'
 
 // ── Icons ─────────────────────────────────────────────────────
@@ -79,7 +80,7 @@ function getInitials(name: string): string {
 function resolveAvatarUrl(raw: string | null | undefined): string | null {
   if (!raw) return null
   if (raw.startsWith('http') || raw.startsWith('data:')) return raw
-  const base = 'https://unstickynotes-api.onrender.com'
+  const base = OUTPUT_URL + '/api'
   return raw.startsWith('/') ? `${base}${raw}` : `${base}/${raw}`
 }
 

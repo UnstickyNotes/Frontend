@@ -162,9 +162,10 @@ useEffect(() => {
 
     try {
       const profileRes = await ProfileService.getProfile()
-      const userData = (profileRes as any)?.data ?? profileRes
+      const userData:User = (profileRes as any)?.data ?? profileRes
       if (userData && (userData.id || userData.email)) {
         setUser(userData)
+        console.log("user data    :   " + userData.Oauth_provider)
         localStorage.setItem('user_id', userData.id)
         requestPull()
           .then((res) => {
