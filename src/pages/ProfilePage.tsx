@@ -175,7 +175,6 @@ export default function ProfilePage() {
     'ima bitch',
   ]
   const isDeleteFlags = (input:string) => {
-    console.log(user?.Oauth_provider)
     for(let f of deletingFlags){
       if (input.toLowerCase() === f) return true
     }
@@ -257,8 +256,9 @@ export default function ProfilePage() {
       setDeleting(false)
     }
   }
-  const handleDeleteOAccount = async() => {
-    console.log('deleting')
+  const handleDeleteOAccount = async(e:React.FormEvent) => {
+    console.log('hey')
+    e.preventDefault()
     setDeleting(true)
     try {
       await ProfileService.deleteAccount(usedOauth)
@@ -267,7 +267,7 @@ export default function ProfilePage() {
     } catch {
       setDeleting(false)
     }
-    finally{setDeleting(false)}
+    // finally{setDeleting(false)}
   }
 
   const initials = getInitials(user?.first_name, user?.last_name)
@@ -396,6 +396,15 @@ export default function ProfilePage() {
         confirmText="Remove"
         isDestructive
       />
+      {/* <ConfirmModal
+        isOpen={deleteOAccountModal}
+        onClose={() => setDeleteOAccountModal(false)}
+        onConfirm={handleDeleteOAccount}
+        title="Delete Account"
+        message="This action is permanent and can't be undone? Write 'I'm a bitch' to confirm you want to delete your account."
+        confirmText="Delete Account"
+        isDestructive
+      /> */}
       <Modal isOpen={deleteAccountModal} onClose={() => setDeleteAccountModal(false)} maxWidth="400px">
         <form onSubmit={handleDeleteAccount}>
           <div className="modal-header">
@@ -420,14 +429,14 @@ export default function ProfilePage() {
         </form>
       </Modal>
 
-      <Modal isOpen={deleteOAccountModal} onClose={() => setDeleteOAccountModal(false)} maxWidth="400px">
-        <form onSubmit={handleDeleteAccount}>
+      <Modal isOpen={deleteOAccountModal} onClose={() => setDeleteOAccountModal(false)} maxWidth="200px">
+        <form onSubmit={handleDeleteOAccount}>
           <div className="modal-header">
             <h3 className="modal-title">Delete Account</h3>
           </div>
           <p className="modal-subtitle">This action is permanent and cannot be undone.</p>
           <div className="modal-field" style={{ marginTop: '1rem' }}>
-            <label className="modal-label">Please, Write "Im a bitch" to delete your accout.</label>
+            <label className="modal-label">Please, Write <strong>"Im a bitch"</strong> to delete your accout.</label>
             <input
             // value={usedOauth? 'true':'false'}
               onChange={e => setDeleteFlag(e.target.value)}
@@ -436,10 +445,7 @@ export default function ProfilePage() {
           </div>
           <div className="modal-actions">
             <button className="btn-cancel" type="button" onClick={() => setDeleteOAccountModal(false)}>Cancel</button>
-            <button className="btn-destructive" onClick={(() => {
-              handleDeleteOAccount
-              setDeleteOAccountModal(false)
-            })} disabled={deleting || !isDeleteFlags(deleteFlag)} style={{ flex: 1 }}>
+            <button className="btn-destructive" type='submit' disabled={deleting || !isDeleteFlags(deleteFlag)} style={{ flex: 1 }}>
               {deleting ? 'Deleting…' : 'Delete Account'}
             </button>
           </div>

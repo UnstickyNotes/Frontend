@@ -1087,7 +1087,7 @@ input:-webkit-autofill:active {
 .modal-label {
   display: block;
   font-size: 0.5625rem;
-  font-weight: 700;
+  font-weight: 300;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-muted);

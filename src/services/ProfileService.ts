@@ -44,11 +44,13 @@ export const updateProfile = async(updateInfo:UserAttributes) => {
 }
 
 export const deleteAccount = async(usedOauth:boolean, password?:string) => {
+    console.log('het.. you are deleting yo account')
     const url:string = usedOauth
     ? `api/profile`
     : `api/profile/?password=${password}`
-
-
+    
+    
     const response = await api.delete<Response<User>>(url);
+    console.log('het.. you are deleting yo account' +  response.data.data)
     return response.data;
 }
