@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const env:string = "development"
+const env:string = "production"
 export const OUTPUT_URL:string = (env === 'production') ? 'https://unstickynotes-api.onrender.com' : 'http://localhost:8000'
 
 const api = axios.create({
